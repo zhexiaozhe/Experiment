@@ -48,6 +48,7 @@ for step in range(501):
 #仿真数据采集
 np.save('data\S_Theta1.npy',np.array(Angle1))
 np.save('data\S_Theta2.npy',np.array(Angle2))
+np.save('data\S_torque.npy',np.array(A))
 
 plt.figure(1)
 plt.title('Action Figure')
