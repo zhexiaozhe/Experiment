@@ -46,14 +46,24 @@ task3.CreateAIVoltageChan("Dev2/ai0:1","",DAQmx_Val_Cfg_Default,-10.0,10.0,DAQmx
 ser=serial.Serial('com11',115200)
 def SER():
     b = []
+    b1=[]
     #数据包数据采集
     for _ in range(22):
         a = ser.read()
-        b.append(a)
-    b[9] = int(binascii.b2a_hex(b[9]).decode('ascii'), 16)
-    b[10] = int(binascii.b2a_hex(b[10]).decode('ascii'), 16)
-    b[18] = int(binascii.b2a_hex(b[18]).decode('ascii'), 16)
-    b[19] = int(binascii.b2a_hex(b[19]).decode('ascii'), 16)
+        a=int(binascii.b2a_hex(a).decode('ascii'), 16)
+        b1.append(a)
+        # 增加判断机制
+        for i in range(22):
+            m = i
+            if b1[i] == 90 and b1[i + 1] == 165:
+                break
+        j = 0
+        for i in range(22):
+            if m + i < 22:
+                b.append(b1[m + i])
+            else:
+                b.append(b1[j])
+                j += 1
     # 角度计算
     if b[19] < 127:
         roll = (b[19] * 256 + b[18]) / 100
@@ -120,6 +130,7 @@ for step in range(501):
     torque = data3[1] * 2.73 - begin_torque
     #时间采集
     Time.append(time.clock() - start_time - 0.018)
+
     T_collect.append(torque)
     T_send.append(2.73*value)
     Theta1.append(angle1)

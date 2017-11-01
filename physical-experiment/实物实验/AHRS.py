@@ -2,21 +2,29 @@ import serial
 import binascii
 from numpy import pi
 import time
-
+import numpy as np
 ser=serial.Serial('com11',115200)
 def SER():
     b = []
-
+    b1=[]
     for _ in range(22):
 
         a = ser.read()
+        a=int(binascii.b2a_hex(a).decode('ascii'), 16)
+        b1.append(a)
 
-        b.append(a)
-
-    b[9] = int(binascii.b2a_hex(b[9]).decode('ascii'), 16)
-    b[10] = int(binascii.b2a_hex(b[10]).decode('ascii'), 16)
-    b[18] = int(binascii.b2a_hex(b[18]).decode('ascii'), 16)
-    b[19] = int(binascii.b2a_hex(b[19]).decode('ascii'), 16)
+    #增加判断机制
+    for i in range(22):
+        m=i
+        if b1[i]==90 and b1[i+1]==165:
+            break
+    j=0
+    for i in range(22):
+        if m+i<22:
+            b.append(b1[m+i])
+        else:
+            b.append(b1[j])
+            j+=1
 
     # 角度计算
     if b[19] < 127:
