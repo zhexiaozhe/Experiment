@@ -53,17 +53,17 @@ def SER():
         a=int(binascii.b2a_hex(a).decode('ascii'), 16)
         b1.append(a)
         # 增加判断机制
-        for i in range(22):
-            m = i
-            if b1[i] == 90 and b1[i + 1] == 165:
-                break
-        j = 0
-        for i in range(22):
-            if m + i < 22:
-                b.append(b1[m + i])
-            else:
-                b.append(b1[j])
-                j += 1
+    for i in range(22):
+        m = i
+        if b1[i] == 90 and b1[i + 1] == 165:
+            break
+    j = 0
+    for i in range(22):
+        if m + i < 22:
+            b.append(b1[m + i])
+        else:
+            b.append(b1[j])
+            j += 1
     # 角度计算
     if b[19] < 127:
         roll = (b[19] * 256 + b[18]) / 100
@@ -87,7 +87,10 @@ task3.StartTask()
 #给杆2角度计算差值做准备
 angle2=0
 pre_data2=np.zeros((1,), dtype=numpy.float64)
-
+#给定力矩
+dataFile = u'F:/matlab_file/xiaogu.mat'
+data = sio.loadmat(dataFile)
+t=data['torque01']
 #给扭矩采集一个初始值，用来纠正偏差
 task3.ReadAnalogF64(1, 10.0, DAQmx_Val_GroupByChannel, data3, 2, byref(read3), None)
 begin_torque=data3[1]*2.73
@@ -104,10 +107,11 @@ start_time=time.clock()
 for step in range(501):
     #定义扭矩
     # value=6/2.73 * np.sin(0.02*pi * step)
+    # value=t[step]/2.73
     if step<100:
         value = 0
     else:
-        value = 4/2.73 * np.sin(0.02*pi * (step-100))
+        value = 6/2.73 * np.sin(0.02*pi * (step-100))
     data0=sgn(value)#转向使能给定
     task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)#数字口发送
     task1.WriteAnalogScalarF64(1, 10.0, abs(value), None)#模拟口发送
@@ -138,7 +142,7 @@ for step in range(501):
     Angle_velocity1.append(angle_velocity1)
     Angle_velocity2.append(angle_velocity2)
     print("角度1：",angle1," 角度2：",angle2[0]," 角速度1: ",angle_velocity1," 角速度2: ",angle_velocity2)
-    # time.sleep(0.02)
+    # time.sleep(0.01)
 print(time.clock()-start_time)
 #采集完成恢复竖直位置
 data0=np.array([0,0,0,0,0,0,0,0], dtype=np.uint8)

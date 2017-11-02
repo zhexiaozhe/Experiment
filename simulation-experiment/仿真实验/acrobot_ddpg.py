@@ -11,7 +11,7 @@ import tensorflow as tf
 
 # ENV_NAME='MountainCarContinuous-v0'
 ENV_NAME = 'Acrobot-v1'
-test_name='test 64'
+test_name='test 62'
 EPISODES = 2000
 TEST = 1
 #单目标

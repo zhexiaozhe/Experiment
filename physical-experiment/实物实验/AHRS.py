@@ -43,7 +43,7 @@ def SER():
     # print("角度：%s 角速度：%s" % (roll, -dr))
     return (roll,-dr)
 start_time=time.clock()
-for step in range(1000):
+for step in range(100000000):
     roll,dr=SER()
     print("角度：%s 角速度：%s" % (roll, dr))
 print(time.clock()-start_time)
