@@ -46,8 +46,8 @@ class CONTROL:
           +0.5*self.B*self.omega4/(self.a-1)*sin((self.a-1)*x+self.b)+0.5*self.B*self.omega5/(self.a+2)*sin((self.a+2)*x+self.b)
         return F
 
-    def U(self,state):
-        self.s=state
+    def U(self,s):
+        self.s=s
         self.A = self.omega2 + self.a * self.omega1 + self.a * self.omega2
         self.B = (1 + 2 * self.a) * self.omega3
         self.Y0 =0
@@ -98,6 +98,16 @@ class CONTROL:
 
 if __name__ == '__main__':
     env=gym.make('Acrobot-v1')
+    state=env.reset()
+    control=CONTROL()
+    for step in range(1000):
+        env.render()
+        if step==0:
+            a=[0]
+        else:
+            a=[control.Torque(inf[2])]
+        state,reward,done,inf=env.step(a)
+
 
 
 
