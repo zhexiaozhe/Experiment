@@ -6,7 +6,6 @@
 @time: 2017/11/18 14:46
 '''
 
-import numpy as np
 import gym
 from numpy import pi,sin,cos
 from math import atan
@@ -84,16 +83,12 @@ class CONTROL:
         fdh=2*self.omega3*dtheta2*sin(theta2)*dh
         #虚约束项
         v=(k3*atan(U*dtheta2/B1)-B2*U+fh+fdh)/d11
-
         f1=-(d22*(h1+phi1)-d12*(h2+phi2))/(d11*d22-d12*d21)
         g1=-d12/(d11*d22-d12*d21)
         f2=(d21*(h1+phi1)-d11*(h2+phi2))/(d11*d22-d12*d21)
         g2=d11/(d11*d22-d12*d21)
-
         ddh=v-k1*dh-k2*h
-
         T=(ddh-f1+self.a*f2)/(g1-self.a*g2)
-
         return T
 
 if __name__ == '__main__':
