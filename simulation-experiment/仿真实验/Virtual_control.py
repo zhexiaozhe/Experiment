@@ -9,6 +9,8 @@
 import gym
 from numpy import pi,sin,cos
 from math import atan
+import matplotlib.pyplot as plt
+import numpy as np
 
 #虚约束控制函数
 class CONTROL:
@@ -60,10 +62,12 @@ class CONTROL:
         theta2=state[1]
         dtheta1=state[2]
         dtheta2=state[3]
+        ############################################
         #控制器系数
         k1=20
         k2=80
-        k3=50
+        k3=55
+        #############################################
         sgn = lambda x: 1 if x > 0 else -1 if x < 0 else 0
         d11 = self.omega1 + self.omega2 + 2 * self.omega3 * cos(theta2)
         d12 = self.omega2 + self.omega3 * cos(theta2)
@@ -81,8 +85,7 @@ class CONTROL:
         B3=self.omega4*self.g*cos(self.a*theta2+self.b)+self.omega5*self.g*cos(self.a*theta2+self.b+theta2)
         fh=B3-self.omega4*self.g*cos(h+self.a+self.b)+self.omega5*self.g*cos(h+self.a*theta2+self.b+theta2)
         fdh=2*self.omega3*dtheta2*sin(theta2)*dh
-        #虚约束项
-        v=(k3*atan(U*dtheta2/B1)-B2*U+fh+fdh)/d11
+        v=(k3*atan(U*dtheta2/B1)-B2*U+fh+fdh)/d11#虚约束项
         f1=-(d22*(h1+phi1)-d12*(h2+phi2))/(d11*d22-d12*d21)
         g1=-d12/(d11*d22-d12*d21)
         f2=(d21*(h1+phi1)-d11*(h2+phi2))/(d11*d22-d12*d21)
@@ -95,13 +98,51 @@ if __name__ == '__main__':
     env=gym.make('Acrobot-v1')
     state=env.reset()
     control=CONTROL()
+    #绘图变量
+    Theta1=[]
+    Theta2=[]
+    Theta1d=[]
+    Theta2d=[]
+    Theta1_velocity=[]
+    Theta2_velocity=[]
+    Action=[]
+    Action_smoothing=[]
     for step in range(1000):
         env.render()
         if step==0:
             a=[0]
+            a_smoothing=a
         else:
-            a=[control.Torque(inf[2])]
-        state,reward,done,inf=env.step(a)
+            a=[np.clip(control.Torque(inf[2]),-10,10)]
+
+        a_smoothing=[0.2*a[0]+0.8*a_smoothing[0]]
+        state,reward,done,inf=env.step(a_smoothing)
+        Theta1.append(inf[2][0])
+        Theta2.append(inf[2][1])
+        Theta1_velocity.append(inf[2][2])
+        Theta2_velocity.append(inf[2][3])
+        Theta1d.append(-pi/4)
+        Theta2d.append(pi/2)
+        Action.append(a)
+        Action_smoothing.append(a_smoothing)
+    ###########################################
+    plt.figure(1)
+    plt.plot(Theta1,'r-',label='Theta1')
+    plt.plot(Theta1d,'g--',label='Theta1d')
+    plt.plot(Theta2, 'b-', label='Theta2')
+    plt.plot(Theta2d,'y--',label='Theta2d')
+    plt.legend()
+    plt.figure(2)
+    plt.plot(Action,'r-',label='Action')
+    plt.plot(Action_smoothing,'b-',label='Action_smoothing')
+    plt.legend()
+    plt.figure(3)
+    plt.plot(Theta1_velocity,'r-',label='Theta1_volocity')
+    plt.plot(Theta2_velocity, 'b-', label='Theta2_volocity')
+    plt.legend()
+    plt.show()
+    #################################
+
 
 
 
