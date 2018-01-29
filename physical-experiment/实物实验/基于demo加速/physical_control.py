@@ -2,10 +2,11 @@
 '''
 @author: 程哲
 @contact: 909991719@qq.com
-@file: physical_virtual_control.py
+@file: physical_control.py
 @time: 2017/11/19 20:19
 '''
-from Virtual_control import *
+# from Virtual_control import *
+from Dynamic_Servo import *
 import numpy as np
 from numpy import pi,sin,cos
 import time
@@ -28,6 +29,8 @@ Theta2d=[]
 Angle_velocity1 = []  # 角速度采集
 Angle_velocity2 = []
 Angle_v2_smoothing=[]
+E=[]
+Ed=[]
 ##########################################################################
 class MyThread(threading.Thread):
     def __init__(self):
@@ -64,27 +67,40 @@ class MyThread(threading.Thread):
 
         def SER():
             b = []
-            # 数据包数据采集
+            b1 = []
             for _ in range(22):
                 a = ser.read()
-                b.append(a)
-            b[9] = int(binascii.b2a_hex(b[9]).decode('ascii'), 16)
-            b[10] = int(binascii.b2a_hex(b[10]).decode('ascii'), 16)
-            b[18] = int(binascii.b2a_hex(b[18]).decode('ascii'), 16)
-            b[19] = int(binascii.b2a_hex(b[19]).decode('ascii'), 16)
+                a = int(binascii.b2a_hex(a).decode('ascii'), 16)
+                b1.append(a)
+
+            # 增加判断机制
+            for i in range(22):
+                m = i
+                if b1[i] == 90 and b1[i + 1] == 165:
+                    break
+            j = 0
+            for i in range(22):
+                if m + i < 22:
+                    b.append(b1[m + i])
+                else:
+                    b.append(b1[j])
+                    j += 1
+
             # 角度计算
             if b[19] < 127:
                 roll = (b[19] * 256 + b[18]) / 100
             else:
                 roll = ((b[19] - 256) * 256 + b[18]) / 100
-            # 角速度计算
+                # 角速度计算
             if b[10] < 127:
                 dr = (b[10] * 256 + b[9]) * (2000 / 32768)
             else:
                 dr = ((b[10] - 256) * 256 + b[9]) * (2000 / 32768)
-            # 转换成弧度制
+                # 转换成弧度制
             roll = roll * pi / 180
             dr = dr * pi / 180
+
+            # print("角度：%s 角速度：%s" % (roll, -dr))
             return (roll, -dr)
 
         #角度角速度处理
@@ -132,19 +148,21 @@ class MyThread(threading.Thread):
 
         control=CONTROL()
 
-        for step in range(16200):
+        for step in range(3000):
 
             if step==199:
+                print('开始采集数据')
                 start_time = time.clock()
             # 杆1角度和角速度采集
-            # 前面大约200个不知道什么原因呢采样时间非常短
+            # 前面大约200个不知道什么原因
+            # 采样时间非常短
             angle1, angle_velocity1 = SER()
             # 杆2角速度采集
             task3.ReadAnalogF64(1, 10.0, DAQmx_Val_GroupByChannel, data3, 2, byref(read3), None)
             angle_velocity2 = data3[0] * pi / 3  # 转换成弧度
-            if step==199 or step==0:
+            if step==699 or step==0:
                 angle_v2_smoothing=angle_velocity2
-            angle_v2_smoothing=0.5*angle_velocity2+0.5*angle_v2_smoothing
+            angle_v2_smoothing=1.0*angle_velocity2+0.0*angle_v2_smoothing
             # 杆2角度采集
             task2.ReadCounterF64(1, 0.0, data2, 1, byref(read2), None)
             dir = sgn2(data3[0])
@@ -155,21 +173,23 @@ class MyThread(threading.Thread):
             #对状态进行预处理和整合
             state=[angle1,angle2,angle_velocity1,angle_velocity2]
             # 发送扭矩
-            value = 1/2.73*control.Torque(state)[0]
-            if step>=199:
+            value = control.Torque(state)
+            T=1/2.73*value[0]
+            e=value[1]
+            e_d=value[2]
+            if step>=699:
                 if flag==1:
-                    value=np.clip(value,-10/2.73,10/2.73)
-                    if step==199:
-                        value_smoothing=value
-                    value_smoothing=0.5*value+0.5*value_smoothing
-                    # value=4/2.73
+                    T=np.clip(T,-10.8/2.73,10.8/2.73)
+                    if step==699:
+                        T_smoothing=T
+                    T_smoothing=1.0*T+0.0*T_smoothing
                 else:
-                    value_smoothing=0
+                    T_smoothing=0
             else:
-                value_smoothing = 0
-            data0 = sgn(value_smoothing)  # 转向使能给定
+                T_smoothing = 0
+            data0 = sgn(T_smoothing)  # 转向使能给定
             task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)  # 数字口发送
-            task1.WriteAnalogScalarF64(1, 10.0, abs(value_smoothing), None)  # 模拟口发送
+            task1.WriteAnalogScalarF64(1, 10.0, abs(T_smoothing), None)  # 模拟口发送
             # 扭矩采集
             # task3.ReadAnalogF64(1, 10.0, DAQmx_Val_GroupByChannel, data3, 2, byref(read3), None)
             torque = data3[1] * 2.73 - begin_torque#data3[1]是上一个点
@@ -178,11 +198,13 @@ class MyThread(threading.Thread):
                 Theta1.append(angle1)
                 Theta2.append(angle2)
                 Theta1d.append(-pi/4)
-                Theta2d.append(pi/2)
+                Theta2d.append(pi/4)
                 Angle_velocity1.append(angle_velocity1)
                 # Angle_v2_smoothing.append(angle_velocity2)
                 Angle_velocity2.append(angle_velocity2)
-                T_send.append(2.73*value_smoothing)
+                T_send.append(2.73*T_smoothing)
+                E.append(e)
+                Ed.append(e_d)
                 if step>199:
                     T_collect.append(torque)
         print(time.clock() - start_time)
@@ -194,10 +216,12 @@ def start_me():
     flag=1
     thread=MyThread()
     thread.start()
+    print('开始')
 
 def stop_me():
     global flag
     flag=0
+    print('停止')
 
 if __name__ == '__main__':
     ###################################################################
@@ -247,6 +271,10 @@ if __name__ == '__main__':
     # plt.plot(Angle_v2_smoothing,'g-',label='Angle_v2_smoothing')
     plt.plot(Angle_velocity2, 'b-', label='Angle_velocity2')
     plt.grid()
+    plt.legend()
+    plt.figure(4)
+    plt.plot(E,label='E')
+    plt.plot(Ed,label='Ed')
     plt.legend()
     plt.show()
     ##########################################################################
