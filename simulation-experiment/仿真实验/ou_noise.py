@@ -28,7 +28,7 @@ class OUNoise:
         return self.state
 
 if __name__ == '__main__':
-    ou = OUNoise(2)
+    ou = OUNoise(1)
     states = []
     for i in range(1000):
         states.append(ou.noise())

@@ -1,10 +1,9 @@
-
-import tensorflow as tf 
+import tensorflow as tf
 import numpy as np
 import math
 
-LAYER1_SIZE = 400
-LAYER2_SIZE = 300
+LAYER1_SIZE = 40
+LAYER2_SIZE = 30
 LEARNING_RATE = 1e-3
 TAU = 0.001
 L2 = 0.01
@@ -147,6 +146,4 @@ class CriticNetwork:
 		#分开保存
 		# self.saver = tf.train.Saver(self.net)
 		print ('save critic-network...',time_step)
-		self.saver.save(self.sess, 'saved_critic_networks/' + 'critic-network-62', global_step = time_step)
-
-		
+		self.saver.save(self.sess, 'saved_critic_networks/' + 'critic-network-86', global_step = time_step)

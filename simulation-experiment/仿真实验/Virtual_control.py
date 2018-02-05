@@ -107,7 +107,8 @@ if __name__ == '__main__':
     Theta2_velocity=[]
     Action=[]
     Action_smoothing=[]
-    for step in range(1000):
+    Tau_theta1=[]
+    for step in range(2000):
         env.render()
         if step==0:
             a=[0]
@@ -115,8 +116,9 @@ if __name__ == '__main__':
         else:
             a=[np.clip(control.Torque(inf[2]),-10,10)]
 
-        a_smoothing=[0.2*a[0]+0.8*a_smoothing[0]]
+        a_smoothing=[0.5*a[0]+0.5*a_smoothing[0]]
         state,reward,done,inf=env.step(a_smoothing)
+        Tau_theta1.append(a_smoothing[0]*inf[2][2])
         Theta1.append(inf[2][0])
         Theta2.append(inf[2][1])
         Theta1_velocity.append(inf[2][2])
@@ -140,6 +142,10 @@ if __name__ == '__main__':
     plt.plot(Theta1_velocity,'r-',label='Theta1_volocity')
     plt.plot(Theta2_velocity, 'b-', label='Theta2_volocity')
     plt.legend()
+    plt.figure(4)
+    plt.plot(Tau_theta1,label='Tau*Theta1')
+    plt.legend()
+    plt.grid()
     plt.show()
     #################################
 

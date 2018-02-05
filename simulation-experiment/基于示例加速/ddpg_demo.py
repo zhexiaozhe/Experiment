@@ -45,9 +45,9 @@ class DDPG_DEMO_PRE(object):
         demo_action_batch = np.resize(demo_action_batch, [PRE_BATCH_SIZE, 1])
 
         #Calculate q_sup
-        action_batch=self.actor_network.actions(demo_state_batch)
+        action_batch=self.actor_network.target_actions(demo_state_batch)
         cost=np.mean(np.square(10*(demo_action_batch-action_batch)))
-        q_sup_batch=H*(abs(action_batch-demo_action_batch)<0.01)+self.critic_network.q_value(demo_state_batch,action_batch)
+        q_sup_batch=H*(abs(action_batch-demo_action_batch)<0.1)+self.critic_network.target_q(demo_state_batch,action_batch)
 
         # Update critic by minimizing the loss L
         q_sup_batch = np.resize(q_sup_batch, [PRE_BATCH_SIZE, 1])

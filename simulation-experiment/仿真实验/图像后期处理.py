@@ -7,7 +7,10 @@
 '''
 import matplotlib.pyplot as plt
 import  matplotlib.image as mpimg
-
-D = mpimg.imread('D.png')
-plt.imshow(D)
+import numpy as np
+data=np.load(u'data/ex67.npy')
+# D = mpimg.imread('D.png')
+# plt.imshow(D)
+# plt.show()
+plt.plot(data)
 plt.show()

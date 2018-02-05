@@ -28,7 +28,7 @@ task1.StartTask()
 angle=0
 pre_data1=np.zeros((1,), dtype=numpy.float64)
 start_time=time.clock()
-for i in range(10000000):
+for i in range(10000):
     task.ReadAnalogF64(1, 1.0, DAQmx_Val_GroupByChannel, data, 1, byref(read), None)
     task1.ReadCounterF64(1, 1.0, data1, 1, byref(read1), None)
     dir=sgn(data)
@@ -37,8 +37,5 @@ for i in range(10000000):
     angle=angle+dif_angle
     pre_data1=data1[0]
     print(angle)
-    time.sleep(0.01)
+    time.sleep(0.02)
 print(time.clock()-start_time)
-
-
-

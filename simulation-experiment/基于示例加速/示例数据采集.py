@@ -19,6 +19,7 @@ env = filter_env.makeFilteredEnv(gym.make(ENV_NAME))
 # action = 0
 i=0
 demo_buffer=[]
+
 for i in range(2000):
     state=env.reset()
     E=[]
@@ -30,9 +31,17 @@ for i in range(2000):
         #     elif event.type == pygame.JOYAXISMOTION:
         #         if event.axis == 0:
         #             action = 10*event.value
-        action=np.resize(6/10*np.sin(0.02*np.pi*step),[1])
-        next_state,reward,done,inf=env.step(action)
+        # action=np.resize(0.5,[1])
+        # action=np.resize(6/10*np.sin(0.02*np.pi*step),[1])
+        # next_state,reward,done,inf=env.step(action)
+        done=False
+        reward=0
+        state=np.array([0.5,0.5,0.5,0.5,0.6,0.6])
+        action=np.array([0.5])
+        next_state=np.array(([0.5,0.5,0.5,0.5,0.6,0.6]))
         experience = (state, action, reward, next_state, done)
+        # if step==100:
+        #     print(experience)
         demo_buffer.append(experience)
         state = next_state
         if done:

@@ -12,7 +12,7 @@ from numpy import sin,cos,pi
 
 # 目标点
 theta1d = -pi / 4
-theta2d = pi / 2
+theta2d = pi / 4
 
 class CONTROL(object):
     #系统参数
@@ -24,23 +24,37 @@ class CONTROL(object):
     # LINK_COM_POS_2 = 0.333  #: [m] position of the center of mass of link 2
     # LINK_MOI1 = 0.09  #: moments of inertia for both links
     # LINK_MOI2 = 0.033
-    # MU11 = 0.
-    # MU12 = 0.
-    # MU21 = 0.
-    # MU22 = 0.
+    MU11 = 0.
+    MU12 = 0.
+    MU21 = 0.
+    MU22 = 0.
 
-    LINK_LENGTH_1 = 0.593
-    LINK_LENGTH_2 = 0.593
-    LINK_MASS_1 = 2.73
-    LINK_MASS_2 = 1.68
-    LINK_COM_POS_1 = 0.4
-    LINK_MOI1 = 0.25
-    LINK_COM_POS_2 = 0.377
-    LINK_MOI2 = 0.116
-    MU11 = 0.205
-    MU12 = 0.184
-    MU21 = 0.93
-    MU22 = 1.07
+    #理想模型
+    LINK_LENGTH_1 = 1.  # [m]
+    LINK_LENGTH_2 = 1.  # [m]
+    LINK_MASS_1 = 1.  #: [kg] mass of link 1
+    LINK_MASS_2 = 1.  #: [kg] mass of link 2
+    LINK_COM_POS_1 = 0.5  #: [m] position of the center of mass of link 1
+    LINK_COM_POS_2 = 0.5  #: [m] position of the center of mass of link 2
+    LINK_MOI1 = 1.  #: moments of inertia for both links
+    LINK_MOI2 = 1.
+
+    # LINK_LENGTH_1 = 0.593
+    # LINK_LENGTH_2 = 0.5
+    # LINK_MASS_1 = 2.73
+    # LINK_MASS_2 = 0.56
+    # LINK_COM_POS_1 = 0.328
+    # LINK_MOI1 = 0.266
+    # LINK_COM_POS_2 = 0.254
+    # LINK_MOI2 = 0.012
+    # MU11 = 0.95
+    # MU12 = 0.122
+    # MU21 = 0.93
+    # MU22 = 1.07
+    # MU11 = 0.05
+    # MU12 = 0.019
+    # MU21 = 0.971
+    # MU22 = 1.0
 
     omega1 = LINK_MASS_1 * LINK_COM_POS_1 ** 2 + LINK_MASS_2 * LINK_LENGTH_1 ** 2 + LINK_MOI1
     omega2 = LINK_MASS_2 * LINK_COM_POS_2 ** 2 + LINK_MOI2
@@ -55,17 +69,19 @@ class CONTROL(object):
         # self.KD=15
         # self.KP=44
         # self.KV=45
-        self.KE =0.02
+
+        self.KE =10
         self.KD=15
-        self.KP=50
+        self.KP=44
         self.KV=45
+        self.Ed=self.Ed()
 
     def energy(self,state):
 
         m1 = self.LINK_MASS_1
         m2 = self.LINK_MASS_2
         l1 = self.LINK_LENGTH_1
-        lc1 = self.LINK_COM_POS_1
+        lc1 =  self.LINK_COM_POS_1
         lc2 = self.LINK_COM_POS_2
         I1 = self.LINK_MOI1
         I2 = self.LINK_MOI2
@@ -78,8 +94,9 @@ class CONTROL(object):
 
         T1 = 1 / 2 * I1 * dtheta1 ** 2 + 1 / 2 * m1 * (dtheta1 * lc1) ** 2
         V1 = m1 * g * lc1 * sin(theta1)
-        T2 = 1 / 2 * m2 * ((dtheta1 * l1) ** 2 + ((dtheta1 + dtheta2) * lc2) ** 2 + 2 * dtheta1 *
-                           (dtheta1 + dtheta2) * lc2 * l1 * cos(theta2)) + 1 / 2 * I2 * (dtheta1 + dtheta2) ** 2
+        T2 = 1 / 2 * m2 * (
+        (dtheta1 * l1) ** 2 + ((dtheta1 + dtheta2) * lc2) ** 2 + 2 * dtheta1 * (dtheta1 + dtheta2) * lc2 * l1 * cos(
+            theta2)) + 1 / 2 * I2 * (dtheta1 + dtheta2) ** 2
         V2 = m2 * g * (l1 * sin(theta1) + lc2 * sin(theta1 + theta2))
         E = V1 + V2 + T1 + T2
         return E
@@ -92,8 +109,7 @@ class CONTROL(object):
         lc1 = self.LINK_COM_POS_1
         lc2 = self.LINK_COM_POS_2
         g = 9.81
-        Ed = m1 * g * lc1 * sin(theta1d) + m2 * g * (l1
-                    * sin(theta1d) + lc2 * sin(theta1d + theta2d))
+        Ed = m1 * g * lc1 * sin(theta1d) + m2 * g * (l1* sin(theta1d) + lc2 * sin(theta1d + theta2d))
         return Ed
 
     def T(self,state):
@@ -115,11 +131,12 @@ class CONTROL(object):
         phi1 = self.omega4 * self.g * cos(theta1) + phi2
 
         delta=d11*d22-d12**2
-        eE=self.energy(state)
-        edq2=theta2-theta2d
+        E=self.energy(state)
+        eE=E-self.Ed
+        eq2=theta2-theta2d
 
-        tau=(-self.KV*dtheta2-self.KP*edq2-self.KD/delta*(d21*(h1+phi1)-d11*(h2+phi2)))/(self.KE*eE+self.KD*d11/delta)
-        return tau
+        tau=(-self.KV*dtheta2-self.KP*eq2-self.KD/delta*(d21*(h1+phi1)-d11*(h2+phi2)))/(self.KE*eE+self.KD*d11/delta)
+        return (tau,eq2,eE,E,self.Ed)
 
 if __name__=='__main__':
     env=gym.make('Acrobot-v1')
@@ -132,11 +149,19 @@ if __name__=='__main__':
     Theta1_velocity = []
     Theta2_velocity = []
     Action = []
-
-    for step in range(20000):
+    E=[]
+    Ed=[]
+    e_q2=[]
+    e_E=[]
+    for step in range(env.spec.timestep_limit):
         # env.render()
-        T=[np.clip(control.T(state),-15,15)]
-        obs,r,done,inf=env.step(T)
+        out=control.T(state)
+        T=np.clip(out[0],-10.8,10.8)
+        eq2=out[1]
+        eE=out[2]
+        energy=out[3]
+        engergyd=out[4]
+        obs,r,done,inf=env.step([T])
         Theta1.append(inf[1][0])
         Theta2.append(inf[1][1])
         Theta1_velocity.append(inf[1][2])
@@ -144,6 +169,10 @@ if __name__=='__main__':
         Theta1d.append(theta1d)
         Theta2d.append(theta2d)
         Action.append(T)
+        e_q2.append(eq2)
+        e_E.append(eE)
+        E.append(energy)
+        Ed.append(engergyd)
         state=inf[1]
         if done:
             break
@@ -160,4 +189,11 @@ if __name__=='__main__':
     plt.plot(Theta1_velocity,'r-',label='Theta1_volocity')
     plt.plot(Theta2_velocity, 'b-', label='Theta2_volocity')
     plt.legend()
+    plt.figure('误差曲线')
+    plt.plot(e_E,label='eE')
+    plt.plot(e_q2,label='e_q2')
+    plt.legend()
+    plt.figure('能量')
+    plt.plot(E,label='energy')
+    plt.plot(Ed,label='Ed')
     plt.show()

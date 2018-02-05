@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 from numpy import sin,cos,pi
 
 # 目标点
-theta1d = -pi / 6
-theta2d = pi / 6
+theta1d = -pi / 4
+theta2d = pi / 4
 
 class CONTROL(object):
     #系统参数
@@ -30,17 +30,17 @@ class CONTROL(object):
     # MU22 = 0.
 
     LINK_LENGTH_1 = 0.593
-    LINK_LENGTH_2 = 0.593
+    LINK_LENGTH_2 = 0.5
     LINK_MASS_1 = 2.73
-    LINK_MASS_2 = 1.68
-    LINK_COM_POS_1 = 0.4
-    LINK_MOI1 = 0.25
-    LINK_COM_POS_2 = 0.377
-    LINK_MOI2 = 0.116
-    MU11 = 0.205
-    MU12 = 0.184
-    MU21 = 0.93
-    MU22 = 1.07
+    LINK_MASS_2 = 0.56
+    LINK_COM_POS_1 = 0.328
+    LINK_MOI1 = 0.266
+    LINK_COM_POS_2 = 0.254
+    LINK_MOI2 = 0.012
+    MU11 = 0.05
+    MU12 = 0.019
+    MU21 = 0.971
+    MU22 = 1.0
 
     omega1 = LINK_MASS_1 * LINK_COM_POS_1 ** 2 + LINK_MASS_2 * LINK_LENGTH_1 ** 2 + LINK_MOI1
     omega2 = LINK_MASS_2 * LINK_COM_POS_2 ** 2 + LINK_MOI2
@@ -56,7 +56,7 @@ class CONTROL(object):
         # self.KP=44
         # self.KV=45
 
-        self.KE =10
+        self.KE =500
         self.KD=15
         self.KP=500
         self.KV=45

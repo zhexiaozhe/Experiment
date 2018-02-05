@@ -25,7 +25,7 @@ class DDPG:
         self.name = 'DDPG' # name for uploading results
         # Randomly initialize actor network and critic network
         # with both their target networks
-        self.state_dim = 10
+        self.state_dim = 6
         self.action_dim = 1
         self.time_step=1
         self.save_network=True

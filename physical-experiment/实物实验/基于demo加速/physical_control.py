@@ -18,6 +18,7 @@ import PyDAQmx
 import tkinter as tk
 import threading
 ##########################################################################
+
 flag=0
 # 变量采集
 T_collect = []  # 力矩采集
@@ -32,6 +33,7 @@ Angle_v2_smoothing=[]
 E=[]
 Ed=[]
 ##########################################################################
+
 class MyThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)

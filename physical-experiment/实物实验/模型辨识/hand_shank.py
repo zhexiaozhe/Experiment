@@ -19,6 +19,7 @@ class HAND_SHANK(object):
         except pygame.error :
             print('手柄连接失败')
             exit()
+    @property
     def control(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

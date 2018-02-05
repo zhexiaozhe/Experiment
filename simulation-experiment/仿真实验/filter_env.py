@@ -68,10 +68,8 @@ def makeFilteredEnv(env):
 
     def step(self,action):
 
-      ac_f = np.clip(self.filter_action(action),self.a_sc*self.action_space.low,self.a_sc*self.action_space.high)
-
+      ac_f = np.clip(self.a_sc*action,self.a_sc*self.action_space.low,self.a_sc*self.action_space.high)
       obs, reward, term, info = env_type.step(self,ac_f) # super function
-      #print(obs)
       # reward_f=self.filter_reward(reward)
       # obs_f=obs.flatten()
       obs_f = self.filter_observation(obs) #cartpole no need

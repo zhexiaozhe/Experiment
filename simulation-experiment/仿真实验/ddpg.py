@@ -3,8 +3,6 @@
 # Author: Flood Sung
 # Date: 2016.5.4
 # -----------------------------------
-import gym
-import math
 import tensorflow as tf
 import numpy as np
 from ou_noise import OUNoise
@@ -13,7 +11,6 @@ from actor_network_bn import ActorNetwork
 from replay_buffer import ReplayBuffer
 
 # Hyper Parameters:
-
 REPLAY_BUFFER_SIZE = 1000000
 REPLAY_START_SIZE = 10000
 BATCH_SIZE = 64
@@ -36,16 +33,8 @@ class DDPG:
         # self.actor_sess = tf.Session()
         # self.critic_sess=tf.Session()
         self.sess=tf.Session()
-        # 以下两个部分谁在后面谁就保存了整个网络参数
-        # 网络整体保存
         self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim, self.actor_load)
         self.critic_network = CriticNetwork(self.sess, self.state_dim, self.action_dim, self.critic_load)
-
-        #网络分开保存
-        # self.actor_network = ActorNetwork(self.actor_sess, self.state_dim, self.action_dim, self.actor_load)
-        # self.critic_network = CriticNetwork(self.critic_sess, self.state_dim, self.action_dim, self.critic_load)
-
-
 
         # initialize replay buffer
         self.replay_buffer = ReplayBuffer(REPLAY_BUFFER_SIZE)
@@ -100,8 +89,6 @@ class DDPG:
     def noise_action(self,state):
         # Select action a_t according to the current policy and exploration noise
         action = self.actor_network.action(state)
-        # if self.time_step%2500000==0:
-        #     self.exploration_tatio/=2
         return action+self.exploration_tatio*self.exploration_noise.noise()
 
     def action(self,state):
@@ -128,13 +115,3 @@ class DDPG:
         # Re-initialize the random process when an episode ends
         if done:
             self.exploration_noise.reset()
-
-
-
-
-
-
-
-
-
-

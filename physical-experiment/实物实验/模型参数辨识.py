@@ -7,6 +7,9 @@
 '''
 
 import gym
+import pygame
+from pygame import *
+from sys import exit
 import numpy as np
 from numpy import pi,sin,cos
 import time
@@ -88,9 +91,9 @@ task3.StartTask()
 angle2=0
 pre_data2=np.zeros((1,), dtype=numpy.float64)
 #给定力矩
-dataFile = u'F:/matlab_file/xiaogu.mat'
-data = sio.loadmat(dataFile)
-t=data['torque01']
+# dataFile = u'F:/matlab_file/xiaogu.mat'
+# data = sio.loadmat(dataFile)
+# t=data['torque01']
 #给扭矩采集一个初始值，用来纠正偏差
 task3.ReadAnalogF64(1, 10.0, DAQmx_Val_GroupByChannel, data3, 2, byref(read3), None)
 begin_torque=data3[1]*2.73
@@ -102,23 +105,39 @@ Theta2=[]
 Angle_velocity1=[] #角速度采集
 Angle_velocity2=[]
 Time=[]
-
+v=np.load("data\T.npy")
 start_time=time.clock()
-for step in range(501):
+#######手柄控制#########
+pygame.init()
+j = pygame.joystick.Joystick(0)
+j.init()
+action=0
+#######################
+for step in range(1001):
     #定义扭矩
-    # value=6/2.73 * np.sin(0.02*pi * step)
-    # value=t[step]/2.73
-    if step<100:
-        value = 0
-    else:
-        value = 6/2.73 * np.sin(0.02*pi * (step-100))
+    ########手柄控制############
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            exit()
+        elif event.type == pygame.JOYAXISMOTION:
+            if event.axis == 0:
+                action = 5/2.73*event.value
+    value=action
+    #####################################
+    # value=0
+    # value=10/2.73 * np.sin(0.02*pi * step)
+    # value=10*v[step]/2.73
+    # if step<200:
+    #     value = 0
+    # else:
+    #     value = 6/2.73 * np.sin(0.02*pi * (step-200))
     data0=sgn(value)#转向使能给定
     task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)#数字口发送
     task1.WriteAnalogScalarF64(1, 10.0, abs(value), None)#模拟口发送
     #杆1角度和角速度采集
     angle1,angle_velocity1=SER()
     #杆2角速度采集
-    task3.ReadAnalogF64(1, 10.0, DAQmx_Val_GroupByChannel, data3, 2, byref(read3), None)
+    task3.ReadAnalogF64(1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data3, 2, byref(read3), None)
     angle_velocity2 = data3[0] * pi / 3 #转换成弧度
     #杆2角度采集
     task2.ReadCounterF64(1, 0.0, data2, 1, byref(read2), None)
@@ -134,8 +153,9 @@ for step in range(501):
     torque = data3[1] * 2.73 - begin_torque
     #时间采集
     Time.append(time.clock() - start_time - 0.018)
-
-    T_collect.append(torque)
+    #发送与接收差了一个点所以延迟采集一个点
+    if step>0:
+        T_collect.append(torque)
     T_send.append(2.73*value)
     Theta1.append(angle1)
     Theta2.append(angle2[0])
@@ -156,10 +176,11 @@ np.save('data\Theta1.npy',np.array(Theta1))
 np.save('data\Theta2.npy',np.array(Theta2))
 np.save('data\Torque.npy',np.array(T_send))
 np.save('data\Time.npy',np.array(Time))
-
+np.save('data\Angle_velocity1.npy',np.array(Angle_velocity1))
+np.save('data\Angle_velocity2.npy',np.array(Angle_velocity2))
 #生成图像
-plt.figure(1)
-plt.title('Action Experiment Figure')
+plt.figure('动作曲线')
+plt.title('Action Experiment')
 plt.xlabel('Step/0.02s')
 plt.ylabel('Torque/N.m')
 plt.plot(T_collect,'r--',label='collect torque')
@@ -167,8 +188,8 @@ plt.plot(T_send,'b-',label='send torque')
 plt.grid()
 plt.legend()
 
-plt.figure(2)
-plt.title('Angle Experiment Figure')
+plt.figure('角度曲线')
+plt.title('Angle Experiment')
 plt.xlabel('Step/0.02s')
 plt.ylabel('Angle/rad')
 plt.plot(Theta1,'r--',label='theta1')
@@ -176,8 +197,8 @@ plt.plot(Theta2,'b-',label='theta2')
 plt.grid()
 plt.legend()
 
-plt.figure(3)
-plt.title('Angle Velocity Eeperiment Figure')
+plt.figure('角速度曲线')
+plt.title('Angle Velocity Experiment')
 plt.xlabel('Step/0.02s')
 plt.ylabel('Angle_velocity/rad/s')
 plt.plot(Angle_velocity1,'r--',label='Angle_velocity1')
@@ -186,5 +207,3 @@ plt.grid()
 plt.legend()
 
 plt.show()
-
-

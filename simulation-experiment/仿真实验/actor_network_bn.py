@@ -5,10 +5,9 @@ import math
 import os
 import shutil
 
-
 # Hyper Parameters
-LAYER1_SIZE = 400
-LAYER2_SIZE = 300
+LAYER1_SIZE = 40
+LAYER2_SIZE = 30
 LEARNING_RATE = 1e-4
 
 TAU = 0.001
@@ -104,7 +103,6 @@ class ActorNetwork:
 			self.is_training: False
 			})[0]
 
-
 	def target_actions(self,state_batch):
 		return self.sess.run(self.target_action_output,feed_dict={
 			self.target_state_input: state_batch,
@@ -141,7 +139,7 @@ class ActorNetwork:
 		#分开保存
 		# self.saver = tf.train.Saver(self.net)
 		print ('save actor-network...',time_step)
-		self.saver.save(self.sess, 'saved_actor_networks/' + 'actor-network-62', global_step = time_step)
+		self.saver.save(self.sess, 'saved_actor_networks/' + 'actor-network-86', global_step = time_step)
 
 
 
