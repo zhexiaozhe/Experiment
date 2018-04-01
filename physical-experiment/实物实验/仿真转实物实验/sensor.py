@@ -5,20 +5,21 @@
 @time: 2018/1/15 10:53
 '''
 import numpy as np
-from PyDAQmx import *
-import PyDAQmx
-import serial
 import binascii
+import serial
+import PyDAQmx
+
 from numpy import pi,sin,cos
+from PyDAQmx import *
 
 class CONTROL(object):
     def __init__(self):
         self.ser = serial.Serial('com11', 115200)
         # 使能控制
-        self.sgn = lambda x: np.array([0, 1, 0, 0, 0, 0, 0, 0], dtype=np.uint8) if x > 0 else np.array(
-                                        [1, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8) if x < 0 else np.array([0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8)
+        self.sgn = lambda x: np.array([0, 1], dtype=np.uint8) if x > 0 else np.array(
+                                        [1, 0], dtype=np.uint8) if x < 0 else np.array([0, 0], dtype=np.uint8)
         self.task0 = Task()
-        self.task0.CreateDOChan("/Dev2/port0/line0:7", "", PyDAQmx.DAQmx_Val_ChanForAllLines)
+        self.task0.CreateDOChan("/Dev2/port0/line0:1", "", PyDAQmx.DAQmx_Val_ChanForAllLines)
         # 输出扭矩控制
         # 扭矩与电压之间的转换关系为：T=1/2.73*value
         self.task1 = Task()
@@ -87,7 +88,7 @@ class CONTROL(object):
     def read_daq(self):
         # 杆2角速度采集
         self.task3.ReadAnalogF64(1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, self.data3, 2, byref(self.read3), None)
-        self.angle_velocity2 = self.data3[0] * pi / 3  # 转换成弧度
+        self.angle_velocity2 = self.data3[0] *2* pi / 3  # 转换成弧度
         # 杆2角度采集
         self.task2.ReadCounterF64(1, 0.0, self.data2, 1, byref(self.read2), None)
         dir = self.sgn2(self.data3[0])
@@ -105,7 +106,8 @@ class CONTROL(object):
         self.task1.WriteAnalogScalarF64(1, 10.0, abs(value), None)
 
     def stop(self):
-        data0 = np.array([0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8)
+        data0 = np.array([0, 0], dtype=np.uint8)
+        self.task1.WriteAnalogScalarF64(1, 10.0, 0, None)
         self.task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)
         self.task0.StopTask()
         self.task1.StopTask()
