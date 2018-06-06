@@ -122,10 +122,7 @@ class ActorNetwork:
 		updates_collections=None,is_training=False, reuse=True,scope=scope_bn,decay=0.9, epsilon=1e-5))
 
 	def load_network(self):
-		#整体加载
 		self.saver = tf.train.Saver()
-		#分开加载
-		# self.saver = tf.train.Saver(self.net)
 		checkpoint = tf.train.get_checkpoint_state("saved_actor_networks")
 		if checkpoint and checkpoint.model_checkpoint_path:
 			self.saver.restore(self.sess, checkpoint.model_checkpoint_path)
@@ -134,10 +131,7 @@ class ActorNetwork:
 			print ("Could not find old network weights")
 
 	def save_network(self,time_step,name):
-		# 整体保存
 		self.saver = tf.train.Saver()
-		#分开保存
-		# self.saver = tf.train.Saver(self.net)
 		print ('save actor-network...',time_step)
 		self.saver.save(self.sess, 'saved_actor_networks/' + 'actor-network-86', global_step = time_step)
 

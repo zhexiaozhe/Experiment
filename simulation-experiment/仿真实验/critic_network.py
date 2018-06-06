@@ -61,7 +61,6 @@ class CriticNetwork:
 		W3 = tf.Variable(tf.random_uniform([layer2_size,1],-3e-3,3e-3))
 		b3 = tf.Variable(tf.random_uniform([1],-3e-3,3e-3))
 
-
 		layer1 = tf.nn.relu(tf.matmul(state_input,W1) + b1)
 		layer2 = tf.nn.relu(tf.matmul(layer1,W2) + tf.matmul(action_input,W2_action) + b2)
 		q_value_output = tf.identity(tf.matmul(layer2,W3) + b3)
@@ -128,10 +127,7 @@ class CriticNetwork:
 		return tf.Variable(tf.random_uniform(shape,-1/math.sqrt(f),1/math.sqrt(f)))
 
 	def load_network(self):
-		# 整体加载
 		self.saver = tf.train.Saver()
-		# 分开加载
-		# self.saver = tf.train.Saver(self.net)
 		checkpoint = tf.train.get_checkpoint_state("saved_critic_networks")
 		if checkpoint and checkpoint.model_checkpoint_path:
 			self.saver.restore(self.sess, checkpoint.model_checkpoint_path)
@@ -140,10 +136,7 @@ class CriticNetwork:
 			print ("Could not find old network weights")
 
 	def save_network(self,time_step,name):
-		#整体保存
 		self.saver = tf.train.Saver()
-		#分开保存
-		# self.saver = tf.train.Saver(self.net)
 		print ('save critic-network...',time_step)
 		self.saver.save(self.sess, 'saved_critic_networks/' + 'critic-network-86', global_step = time_step)
 

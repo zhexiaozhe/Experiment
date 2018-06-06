@@ -11,10 +11,10 @@ class ReplayBuffer(object):
         self.buffer_size = buffer_size
         self.num_experiences = 0
         self.buffer = deque()
-        with open('data\object.pickle', 'rb') as f:
-            self.buffer=pickle.load(f)
-            print("数据加载完成")
-            print(np.shape(self.buffer))
+        # with open('data\object.pickle', 'rb') as f:
+        #     self.buffer=pickle.load(f)
+        #     print("数据加载完成")
+        #     print(np.shape(self.buffer))
 
     def get_batch(self, batch_size):
         # Randomly sample batch_size examples

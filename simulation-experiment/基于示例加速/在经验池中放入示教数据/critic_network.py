@@ -131,7 +131,6 @@ class CriticNetwork:
 		return tf.Variable(tf.random_uniform(shape,-1/math.sqrt(f),1/math.sqrt(f)))
 
 	def load_network(self):
-		# 整体加载
 		self.saver = tf.train.Saver()
 		checkpoint = tf.train.get_checkpoint_state("saved_critic_networks")
 		if checkpoint and checkpoint.model_checkpoint_path:
@@ -141,7 +140,6 @@ class CriticNetwork:
 			print ("Could not find old network weights")
 
 	def save_network(self,time_step,name):
-		#整体保存
 		self.saver = tf.train.Saver()
 		print ('save critic-network...',time_step)
 		self.saver.save(self.sess, 'saved_critic_networks/' + 'critic-network-86', global_step = time_step)

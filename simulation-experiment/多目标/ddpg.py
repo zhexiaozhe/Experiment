@@ -26,12 +26,10 @@ class DDPG:
         self.state_dim = env.observation_space.shape[0]
         self.action_dim = env.action_space.shape[0]
         self.time_step=1
-        self.save_network=True
-        self.actor_load=True
-        self.critic_load=True
+        self.save_network=False
+        self.actor_load=False
+        self.critic_load=False
         self.exploration_tatio=1
-        # self.actor_sess = tf.Session()
-        # self.critic_sess=tf.Session()
         self.sess=tf.Session()
         self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim, self.actor_load)
         self.critic_network = CriticNetwork(self.sess, self.state_dim, self.action_dim, self.critic_load)
@@ -45,9 +43,7 @@ class DDPG:
     def train(self):
         self.time_step+=1
 
-        # Sample a random minibatch of N transitions from replay buffer
         minibatch = self.replay_buffer.get_batch(BATCH_SIZE) #原来代码
-        # tree_idx, minibatch, ISWeights = self.replay_buffer.sample(BATCH_SIZE)
 
         state_batch = np.asarray([data[0] for data in minibatch])
         action_batch = np.asarray([data[1] for data in minibatch])
@@ -59,7 +55,6 @@ class DDPG:
         action_batch = np.resize(action_batch,[BATCH_SIZE,self.action_dim])
 
         # Calculate y_batch
-        
         next_action_batch = self.actor_network.target_actions(next_state_batch)
         q_value_batch = self.critic_network.target_q(next_state_batch,next_action_batch)
         y_batch = []
@@ -68,13 +63,9 @@ class DDPG:
                 y_batch.append(reward_batch[i])
             else :
                 y_batch.append(reward_batch[i] + GAMMA * q_value_batch[i])
-            #print(reward_batch[i],q_value_batch[i])
-        #y_batch是目标值
         y_batch = np.resize(y_batch,[BATCH_SIZE,1])
         # Update critic by minimizing the loss L
-        # abs_errors,self.cost=self.critic_network.train(ISWeights,y_batch,state_batch,action_batch)
         self.critic_network.train(y_batch, state_batch, action_batch)
-        # self.replay_buffer.batch_update(tree_idx, abs_errors)  # update priority
 
         # Update the actor policy using the sampled gradient:
         action_batch_for_gradients = self.actor_network.actions(state_batch)

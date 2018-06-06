@@ -60,7 +60,6 @@ class ActorNetwork:
 		layer2_bn = self.batch_norm_layer(layer2,training_phase=is_training,scope_bn='batch_norm_2',activation=tf.nn.relu)
 
 		action_output = tf.tanh(tf.matmul(layer2_bn,W3) + b3)
-		# action_output = tf.nn.sigmoid(0.1*(tf.matmul(layer2_bn, W3) + b3))
 
 		return state_input,action_output,[W1,b1,W2,b2,W3,b3],is_training
 
@@ -79,7 +78,6 @@ class ActorNetwork:
 		layer2_bn = self.batch_norm_layer(layer2,training_phase=is_training,scope_bn='target_batch_norm_2',activation=tf.nn.relu)
 
 		action_output = tf.tanh(tf.matmul(layer2_bn,target_net[4]) + target_net[5])
-		# action_output = tf.nn.sigmoid(0.1*(tf.matmul(layer2_bn, target_net[4]) + target_net[5]))
 
 		return state_input,action_output,target_update,is_training
 
@@ -124,10 +122,7 @@ class ActorNetwork:
 		updates_collections=None,is_training=False, reuse=True,scope=scope_bn,decay=0.9, epsilon=1e-5))
 
 	def load_network(self):
-		#整体加载
 		self.saver = tf.train.Saver()
-		#分开加载
-		# self.saver = tf.train.Saver(self.net)
 		checkpoint = tf.train.get_checkpoint_state("saved_actor_networks")
 		if checkpoint and checkpoint.model_checkpoint_path:
 			self.saver.restore(self.sess, checkpoint.model_checkpoint_path)
@@ -136,10 +131,7 @@ class ActorNetwork:
 			print ("Could not find old network weights")
 
 	def save_network(self,time_step,name):
-		# 整体保存
 		self.saver = tf.train.Saver()
-		#分开保存
-		# self.saver = tf.train.Saver(self.net)
 		print ('save actor-network...',time_step)
 		self.saver.save(self.sess, 'saved_actor_networks/' + 'actor-network-86', global_step = time_step)
 

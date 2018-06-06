@@ -36,12 +36,9 @@ class CriticNetwork:
 
 	def create_training_method(self):
 		# Define training optimizer
-		# self.ISWeights = tf.placeholder("float", [None, 1])
 		self.y_input = tf.placeholder("float",[None,1])
 		weight_decay = tf.add_n([L2 * tf.nn.l2_loss(var) for var in self.net])
 		self.cost = tf.reduce_mean(tf.square(self.y_input - self.q_value_output)) + weight_decay
-		# self.abs_errors = tf.reduce_sum(tf.abs(self.y_input - self.q_value_output), axis=1)
-		# self.cost = tf.reduce_mean(self.ISWeights * tf.square(self.y_input - self.q_value_output)) + weight_decay
 		self.optimizer = tf.train.AdamOptimizer(LEARNING_RATE).minimize(self.cost)
 		self.action_gradients = tf.gradients(self.q_value_output,self.action_input)
 
@@ -92,15 +89,6 @@ class CriticNetwork:
 										self.state_input:state_batch,
 										self.action_input:action_batch
 										})
-		# _, abs_errors, cost =self.sess.run([self.optimizer, self.abs_errors, self.cost],feed_dict={
-		# 										self.ISWeights:ISweights,
-		# 										self.y_input:y_batch,
-		# 										self.state_input:state_batch,
-		# 										self.action_input:action_batch
-		# 										})
-		# return abs_errors,cost
-
-
 
 	def gradients(self,state_batch,action_batch):
 		return self.sess.run(self.action_gradients,feed_dict={
@@ -129,10 +117,7 @@ class CriticNetwork:
 		return tf.Variable(tf.random_uniform(shape,-1/math.sqrt(f),1/math.sqrt(f)))
 
 	def load_network(self):
-		# 整体加载
 		self.saver = tf.train.Saver()
-		# 分开加载
-		# self.saver = tf.train.Saver(self.net)
 		checkpoint = tf.train.get_checkpoint_state("saved_critic_networks")
 		if checkpoint and checkpoint.model_checkpoint_path:
 			self.saver.restore(self.sess, checkpoint.model_checkpoint_path)
@@ -141,9 +126,6 @@ class CriticNetwork:
 			print ("Could not find old network weights")
 
 	def save_network(self,time_step,name):
-		#整体保存
 		self.saver = tf.train.Saver()
-		#分开保存
-		# self.saver = tf.train.Saver(self.net)
 		print ('save critic-network...',time_step)
 		self.saver.save(self.sess, 'saved_critic_networks/' + 'critic-network-86', global_step = time_step)

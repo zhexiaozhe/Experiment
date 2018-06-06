@@ -36,7 +36,6 @@ def makeFilteredEnv(env):
 
       # Rewards
       self.r_sc = 0.01 # 二阶倒立摆
-      # self.r_sc=0.1 # 单摆
       self.r_c = 0.
 
       # Special cases
@@ -70,8 +69,6 @@ def makeFilteredEnv(env):
 
       ac_f = np.clip(self.a_sc*action,self.a_sc*self.action_space.low,self.a_sc*self.action_space.high)
       obs, reward, term, info = env_type.step(self,ac_f) # super function
-      # reward_f=self.filter_reward(reward)
-      # obs_f=obs.flatten()
       obs_f = self.filter_observation(obs) #cartpole no need
 
       return obs_f, reward, term, info

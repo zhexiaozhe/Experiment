@@ -50,7 +50,6 @@ class DDPG:
         else:
             minibatch = self.replay_buffer.get_batch(BATCH_SIZE)
 
-
         state_batch = np.asarray([data[0] for data in minibatch])
         action_batch = np.asarray([data[1] for data in minibatch])
         reward_batch = np.asarray([data[2] for data in minibatch])
@@ -61,7 +60,6 @@ class DDPG:
         action_batch = np.resize(action_batch,[BATCH_SIZE,self.action_dim])
 
         # Calculate y_batch
-        
         next_action_batch = self.actor_network.target_actions(next_state_batch)
         q_value_batch = self.critic_network.target_q(next_state_batch,next_action_batch)
         y_batch = []
@@ -70,7 +68,6 @@ class DDPG:
                 y_batch.append(reward_batch[i])
             else :
                 y_batch.append(reward_batch[i] + GAMMA * q_value_batch[i])
-            #print(reward_batch[i],q_value_batch[i])
         #y_batch是目标值
         y_batch = np.resize(y_batch,[BATCH_SIZE,1])
         # Update critic by minimizing the loss L

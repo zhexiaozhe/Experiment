@@ -66,12 +66,11 @@ class DDPG:
                 y_batch.append(reward_batch[i])
             else :
                 y_batch.append(reward_batch[i] + GAMMA * q_value_batch[i])
-            #print(reward_batch[i],q_value_batch[i])
         #y_batch是目标值
         y_batch = np.resize(y_batch,[BATCH_SIZE,1])
         # Update critic by minimizing the loss L
-        # abs_errors,self.cost=self.critic_network.train(ISWeights,y_batch,state_batch,action_batch)
         self.critic_network.train(y_batch, state_batch, action_batch)
+        # abs_errors,self.cost=self.critic_network.train(ISWeights,y_batch,state_batch,action_batch)
         # self.replay_buffer.batch_update(tree_idx, abs_errors)  # update priority
 
         # Update the actor policy using the sampled gradient:
@@ -79,9 +78,6 @@ class DDPG:
         q_gradient_batch = self.critic_network.gradients(state_batch,action_batch_for_gradients)
 
         self.actor_network.train(q_gradient_batch,state_batch)
-        # if self.time_step%10000==0:
-        #     print("q值",y_batch[0],self.critic_network.q_value(state_batch, action_batch)[0])
-        #     print("q_gradient_batch:",q_gradient_batch[0])
 
         # Update the target networks
         self.actor_network.update_target()
@@ -100,23 +96,17 @@ class DDPG:
         critic=self.critic_network.single_q_value(state,action)
         return critic
 
-    def close(self):
-        self.sess.close()
-        self.sess = tf.Session()
-        self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim, self.actor_load)
-        self.critic_network = CriticNetwork(self.sess, self.state_dim, self.action_dim, self.critic_load)
-        self.replay_buffer.erase()
-
     def perceive(self,state,action,reward,next_state,done):
         # Store transition (s_t,a_t,r_t,s_{t+1}) in replay buffer
-        # self.replay_buffer.add(state,action,reward,next_state,done)
+        self.replay_buffer.add(state,action,reward,next_state,done)
 
         # Store transitions to replay start size then start training
-        # if self.replay_buffer.count() >  REPLAY_START_SIZE:
-        #     self.train()
+        if self.replay_buffer.count() >  REPLAY_START_SIZE:
+            self.train()
+
         ##加载示教数据
-        self.replay_buffer.add(state, action, reward, next_state, done)
-        self.train()
+        # self.replay_buffer.add(state, action, reward, next_state, done)
+        # self.train()
 
         if (self.time_step+10000) % 100000 == 0:
             if self.save_network:

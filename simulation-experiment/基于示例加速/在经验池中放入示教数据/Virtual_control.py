@@ -142,7 +142,7 @@ if __name__ == '__main__':
         # plt.figure(2)
         # plt.plot(Action,'r-',label='Action')
         # plt.show()
-    pickle.dump(buffer, open('object.pickle', 'wb'))
+    pickle.dump(buffer, open('data\object.pickle', 'wb'))
         # Tau_theta1.append(a_smoothing[0]*inf[0][2])
         # Theta1.append(inf[0][0])
         # Theta2.append(inf[0][1])

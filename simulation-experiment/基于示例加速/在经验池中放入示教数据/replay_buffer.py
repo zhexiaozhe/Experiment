@@ -87,7 +87,6 @@ import pickle
 #     beta_increment_per_sampling = 0.001  # beta的每次采样后增加的数
 #     abs_err_upper = 1.  # clipped abs error 绝对误差上限
 #
-#
 #     def __init__(self, buffer_size):
 #
 #         self.buffer_size = buffer_size
