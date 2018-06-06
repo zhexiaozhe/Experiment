@@ -7,21 +7,24 @@
 '''
 
 import gym
-from numpy import pi,sin,cos
-from math import atan
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
+
+from numpy import pi,sin,cos
+from math import atan
+from collections import deque
 
 #虚约束控制函数
 class CONTROL:
     #系统参数
     LINK_LENGTH_1 = 0.593
     LINK_LENGTH_2 = 0.593
-    LINK_MASS_1 = 2.73
-    LINK_MASS_2 = 1.68
-    LINK_COM_POS_1 = 0.4
+    LINK_MASS_1 = 2.78
+    LINK_MASS_2 = 1.73
+    LINK_COM_POS_1 = 0.3
     LINK_MOI1 = 0.25
-    LINK_COM_POS_2 = 0.377
+    LINK_COM_POS_2 = 0.4
     LINK_MOI2 = 0.116
     MU11 = 0.205
     MU12 = 0.184
@@ -96,8 +99,10 @@ class CONTROL:
 
 if __name__ == '__main__':
     env=gym.make('Acrobot-v1')
-    state=env.reset()
     control=CONTROL()
+    #采集数据
+    buffer = deque()
+    normal = [1, 1, 1, 1, 4 * np.pi, 9 * np.pi]
     #绘图变量
     Theta1=[]
     Theta2=[]
@@ -108,46 +113,67 @@ if __name__ == '__main__':
     Action=[]
     Action_smoothing=[]
     Tau_theta1=[]
-    for step in range(2000):
-        env.render()
-        if step==0:
-            a=[0]
-            a_smoothing=a
-        else:
-            a=[np.clip(control.Torque(inf[2]),-10,10)]
+    for _ in range(10):
+        state = env.reset()
+        print(_)
+        for step in range(1000):
+            # env.render()
+            if step==0:
+                action=[0]
+            else:
+                action=[np.clip(control.Torque(inf[0]),-10,10)]
+            next_state, r, done, inf = env.step(action)
+            action=np.array(action)/10
+            buffer.append((state / normal, action, r, next_state / normal, done))
+            # Theta1.append(inf[0][0])
+            # Theta2.append(inf[0][1])
+            # Theta1_velocity.append(inf[0][2])
+            # Theta2_velocity.append(inf[0][3])
+            # Action.append(action)
+            if done:
+                break
+            state = next_state
+        # plt.figure(1)
+        # plt.plot(Theta1,'r-',label='Theta1')
+        # plt.plot(Theta1d,'g--',label='Theta1d')
+        # plt.plot(Theta2, 'b-', label='Theta2')
+        # plt.plot(Theta2d,'y--',label='Theta2d')
+        # plt.legend()
+        # plt.figure(2)
+        # plt.plot(Action,'r-',label='Action')
+        # plt.show()
+    pickle.dump(buffer, open('data\object_demo.pickle', 'wb'))
+        # Tau_theta1.append(a_smoothing[0]*inf[0][2])
+        # Theta1.append(inf[0][0])
+        # Theta2.append(inf[0][1])
+        # Theta1_velocity.append(inf[0][2])
+        # Theta2_velocity.append(inf[0][3])
+        # Theta1d.append(-pi/4)
+        # Theta2d.append(pi/2)
+        # Action.append(a)
+        # Action_smoothing.append(a_smoothing)
 
-        a_smoothing=[0.5*a[0]+0.5*a_smoothing[0]]
-        state,reward,done,inf=env.step(a_smoothing)
-        Tau_theta1.append(a_smoothing[0]*inf[2][2])
-        Theta1.append(inf[2][0])
-        Theta2.append(inf[2][1])
-        Theta1_velocity.append(inf[2][2])
-        Theta2_velocity.append(inf[2][3])
-        Theta1d.append(-pi/4)
-        Theta2d.append(pi/2)
-        Action.append(a)
-        Action_smoothing.append(a_smoothing)
-    ###########################################
-    plt.figure(1)
-    plt.plot(Theta1,'r-',label='Theta1')
-    plt.plot(Theta1d,'g--',label='Theta1d')
-    plt.plot(Theta2, 'b-', label='Theta2')
-    plt.plot(Theta2d,'y--',label='Theta2d')
-    plt.legend()
-    plt.figure(2)
-    plt.plot(Action,'r-',label='Action')
-    plt.plot(Action_smoothing,'b-',label='Action_smoothing')
-    plt.legend()
-    plt.figure(3)
-    plt.plot(Theta1_velocity,'r-',label='Theta1_volocity')
-    plt.plot(Theta2_velocity, 'b-', label='Theta2_volocity')
-    plt.legend()
-    plt.figure(4)
-    plt.plot(Tau_theta1,label='Tau*Theta1')
-    plt.legend()
-    plt.grid()
-    plt.show()
-    #################################
+    ###################################
+    # plt.figure(1)
+    # plt.plot(Theta1,'r-',label='Theta1')
+    # plt.plot(Theta1d,'g--',label='Theta1d')
+    # plt.plot(Theta2, 'b-', label='Theta2')
+    # plt.plot(Theta2d,'y--',label='Theta2d')
+    # plt.legend()
+    # plt.figure(2)
+    # plt.plot(Action,'r-',label='Action')
+    # plt.plot(Action_smoothing,'b-',label='Action_smoothing')
+    # plt.legend()
+    # plt.figure(3)
+    # plt.plot(Theta1_velocity,'r-',label='Theta1_volocity')
+    # plt.plot(Theta2_velocity, 'b-', label='Theta2_volocity')
+    # plt.legend()
+    # plt.figure(4)
+    # plt.plot(Tau_theta1,label='Tau*Theta1')
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+    # #################################
 
 
 

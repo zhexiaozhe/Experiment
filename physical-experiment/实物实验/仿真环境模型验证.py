@@ -28,23 +28,23 @@ v1_v2=[]
 # t1=matdata['torque01']
 
 A1=[]
-for step in range(2001):
+for step in range(1001):
     env.render()
     # a=t1[step]
     if step<201:
         a=[0]
     else:
-        a=[6*sin(0.02*pi*(step-201))]
+        a=[6*sin(0.01*pi*(step-201))]
     # a=[3]
     obs,r,done,inf=env.step(a)
-    E.append(inf[0])
-    Angle1.append(inf[1][0])
-    Angle2.append(inf[1][1])
-    Angle_velocity1.append(inf[1][2])
-    Angle_velocity2.append(inf[1][3])
+    # E.append(inf[0])
+    Angle1.append(inf[0][0])
+    Angle2.append(inf[0][1])
+    Angle_velocity1.append(inf[0][2])
+    Angle_velocity2.append(inf[0][3])
     A.append(a)
-    Tau_dtheta1.append(inf[1][3]*a[0])
-    v1_v2.append(inf[1][2]*inf[1][3])
+    # Tau_dtheta1.append(inf[1][3]*a[0])
+    # v1_v2.append(inf[1][2]*inf[1][3])
     # A1.append(a1)
     # E.append(inf[6])
 # plt.plot(E)

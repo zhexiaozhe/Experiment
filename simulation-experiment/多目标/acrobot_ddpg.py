@@ -13,8 +13,8 @@ from ddpg import *
 gc.enable()
 
 ENV_NAME = 'Acrobot-v1'
-test_name='open_control_1'
-EPISODES = 10000
+test_name='中期实验2'
+EPISODES = 4000
 TEST = 1
 #单目标
 plot_reward=[]
@@ -39,7 +39,15 @@ def main():
         if (episode+1) % 50 == 0 or episode==0:
             total_reward=0
             testing_step = 0
-
+            theta1=[]
+            theta2=[]
+            theta1d=[]
+            theta2d=[]
+            Action=[]
+            dtheta1=[]
+            dtheta2=[]
+            step=[]
+            distance=[]
             for i in range(TEST):
                 state = env.reset()
                 test_action_smoothing=0
@@ -50,42 +58,55 @@ def main():
                     test_action_smoothing=np.clip(0.5*action+0.5*test_action_smoothing,env.action_space.low,env.action_space.high)
                     state,reward,done,inf = env.step(test_action_smoothing)
                     # state, reward, done, inf = env.step(action)
+                    step.append(0.01*j)
+                    theta1.append(inf[0][0])
+                    theta2.append(inf[0][1])
+                    dtheta1.append(inf[0][2])
+                    dtheta2.append(inf[0][3])
+                    theta1d.append(inf[1])
+                    theta2d.append(inf[2])
+                    distance.append(inf[5])
+                    Action.append(10*test_action_smoothing)
+
 
                     total_reward += reward
                     if done:
                          break
-                # #能量
-                # plt.figure('响应')
-                # plt.plot(step, theta1, label="Theta1")
-                # plt.plot(step, theta2, label="Theta2")
-                # plt.plot(step, theta1d, label="Theta1")
-                # plt.plot(step, theta2d, label="Theta2")
-                # plt.grid()
-                # plt.legend()
-                # plt.figure('动作')
-                # plt.plot(step, Action, label="Action")
-                # # plt.plot(step,Action_smoothing,label="Smoth_Action")
-                # plt.grid()
-                # plt.legend()
-                # plt.figure('角速度')
-                # plt.plot(step, dtheta1, label='dtheta1')
-                # plt.plot(step, dtheta2, label='dtheta2')
-                # plt.grid()
-                # plt.legend()
-                # plt.figure('距离')
-                # plt.plot(step,distance,label="distance")
+                #能量
+                plt.figure('响应')
+                plt.plot(step, theta1,'r-', label="Theta1")
+                plt.plot(step, theta2,'b--', label="Theta2")
+                plt.plot(step, theta1d, 'g-.',label="Theta1d")
+                plt.plot(step, theta2d, 'c:',label="Theta2d")
+                plt.xlabel('time/s')
+                plt.ylabel('角度响应（rad）')
+                plt.grid()
+                plt.legend()
+                plt.figure('动作')
+                plt.plot(step, Action, label="Action")
+                plt.grid()
+                plt.legend()
+                plt.figure('角速度')
+                plt.plot(step, dtheta1, label='dtheta1')
+                plt.plot(step, dtheta2, label='dtheta2')
+                plt.grid()
+                plt.legend()
+                plt.figure('距离')
+                plt.plot(step,distance,label="distance")
                 # plt.legend()
                 # plt.figure('能量')
                 # plt.plot(step, Ed, label="Ed")
                 # plt.plot(step, E, label="E")
                 # plt.legend()
                 # plt.grid()
-                # plt.show()
+                plt.show()
 
                 #基于距离和力矩
                 # plt.figure('响应')
                 # plt.plot(step, theta1, label="Theta1")
                 # plt.plot(step, theta2, label="Theta2")
+                # plt.plot(step, theta1d, label="Theta1")
+                # plt.plot(step, theta2d, label="Theta2")
                 # plt.grid()
                 # plt.legend()
                 # plt.figure('动作')

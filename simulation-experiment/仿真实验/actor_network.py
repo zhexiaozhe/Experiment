@@ -53,7 +53,8 @@ class ActorNetwork:
 
 		layer1 = tf.nn.relu(tf.matmul(state_input,W1) + b1)
 		layer2 = tf.nn.relu(tf.matmul(layer1,W2) + b2)
-		action_output = tf.tanh(tf.matmul(layer2,W3) + b3)
+		# action_output = tf.tanh(tf.matmul(layer2,W3) + b3)
+		action_output = tf.nn.relu(tf.matmul(layer2, W3) + b3)
 
 		return state_input,action_output,[W1,b1,W2,b2,W3,b3]
 
@@ -65,7 +66,8 @@ class ActorNetwork:
 
 		layer1 = tf.nn.relu(tf.matmul(state_input,target_net[0]) + target_net[1])
 		layer2 = tf.nn.relu(tf.matmul(layer1,target_net[2]) + target_net[3])
-		action_output = tf.tanh(tf.matmul(layer2,target_net[4]) + target_net[5])
+		# action_output = tf.tanh(tf.matmul(layer2,target_net[4]) + target_net[5])
+		action_output = tf.nn.relu(tf.matmul(layer2,target_net[4]) + target_net[5])
 
 		return state_input,action_output,target_update,target_net
 
@@ -87,7 +89,6 @@ class ActorNetwork:
 		return self.sess.run(self.action_output,feed_dict={
 			self.state_input:[state]
 			})[0]
-
 
 	def target_actions(self,state_batch):
 		return self.sess.run(self.target_action_output,feed_dict={

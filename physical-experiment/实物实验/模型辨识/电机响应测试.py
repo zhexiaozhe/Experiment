@@ -5,14 +5,13 @@
 @time: 2018/3/29 15:34
 '''
 
+#电机响应测试说明电机正常
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 from PyDAQmx import *
 from sensor import *
-
 
 if __name__=='__main__':
 
@@ -24,14 +23,15 @@ if __name__=='__main__':
     T_send=[]
     Time=[]
     start_time=time.clock()
-    for step in range(200):
+    for step in range(700):
         #方波
-        if step<50:
+        # value=0.3
+        if step<500:
             value=0
-        elif 50<=step and step<100:
-            value=0.5
+        elif 500<=step and step<600:
+            value=0.2
         else:
-            value=-0.5
+            value=-0.2
         #正弦波
         # if step<50:
         #     value=0
@@ -48,6 +48,7 @@ if __name__=='__main__':
     print(time.clock()-start_time)
     plt.figure('动作')
     plt.plot(Time,T_send,label="Torque_send")
+    # plt.scatter(Time,T_get, label="Torque_get")
     plt.plot(Time,T_get, label="Torque_get")
     plt.legend()
     plt.show()

@@ -14,20 +14,32 @@ class SAVE_DATA(object):
         self.Theta2 = []
         self.Angle_velocity1 = []
         self.Angle_velocity2 = []
+        self.DIS=[]
+        self.Theta1d=[]
+        self.Theta2d=[]
 
     def recorde(self,data):
         Theta1=data[0]
+        if Theta1>=3.0:
+            Theta1=Theta1-2*np.pi
         Theta2=data[1]
         dtheta1=data[2]
         dtheta2=data[3]
         T_send = data[4]
         T_collect = data[5]
+        dis=data[7]
+        theta1d=data[8]
+        theta2d=data[9]
+
         self.T_collect.append(T_collect)
-        self.T_send.append(T_send)
+        self.T_send.append(2.73*T_send)
         self.Theta1.append(Theta1)
         self.Theta2.append(Theta2)
         self.Angle_velocity1.append(dtheta1)
         self.Angle_velocity2.append(dtheta2)
+        self.DIS.append(dis)
+        self.Theta1d.append(theta1d)
+        self.Theta2d.append(theta2d)
 
     def save_to_file(self):
         np.save('data\Theta1.npy', np.array(self.Theta1))
@@ -36,6 +48,10 @@ class SAVE_DATA(object):
         np.save('data\Collect_Torque.npy', np.array(self.T_collect))
         np.save('data\Angle_velocity1.npy', np.array(self.Angle_velocity1))
         np.save('data\Angle_velocity2.npy', np.array(self.Angle_velocity2))
+        np.save('data\distance.npy', np.array(self.DIS))
+        np.save('data\Theta1d.npy', np.array(self.Theta1d))
+        np.save('data\Theta2d.npy', np.array(self.Theta2d))
+
         print('数据保存成功')
 
     def load(self):
@@ -45,4 +61,8 @@ class SAVE_DATA(object):
         Angle_velocity2 = np.load('data\Angle_velocity2.npy')
         send_torque = np.load('data\Send_Torque.npy')
         collet_torque = np.load('data\Collect_Torque.npy')
-        return (Angle1, Angle2, Angle_velocity1, Angle_velocity2, send_torque, collet_torque)
+        distance=np.load('data\distance.npy')
+        Angle1d=np.load('data\Theta1d.npy')
+        Angle2d = np.load('data\Theta2d.npy')
+
+        return (Angle1, Angle2, Angle_velocity1, Angle_velocity2, send_torque, collet_torque,distance,Angle1d,Angle2d)

@@ -9,7 +9,6 @@ import numpy as np
 import random
 
 data=np.load('data/demo_buffer.npy')
-
 print(type(data))
 random.sample(list(data),64)
 print(len(data))

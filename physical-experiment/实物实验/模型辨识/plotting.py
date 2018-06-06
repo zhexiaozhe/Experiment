@@ -17,13 +17,14 @@ class PLOT():
         Theta2=data[1]
         Angle_velocity1=data[2]
         Angle_velocity2=data[3]
+        T_send = data[4]
         T_collect =data[5]
-        T_send =data[4]
+
         plt.figure('动作曲线')
         plt.title('Action Experiment')
         plt.xlabel('Step/0.02s')
         plt.ylabel('Torque/N.m')
-        plt.plot(T_collect, 'r--', label='collect torque')
+        plt.plot(T_collect[1:], 'r--', label='collect torque')
         plt.plot(T_send, 'b-', label='send torque')
         plt.grid()
         plt.legend()

@@ -13,7 +13,7 @@ class DISTANCE(object):
         self.LINK_LENGTH_1=0.593
         self.LINK_LENGTH_2 = 0.593
         self.theta1d=-np.pi/4
-        self.theta2d=np.pi/4
+        self.theta2d=np.pi/2
     def dis(self,s):
         # 模型改目标的位置
         g_p1 = [self.LINK_LENGTH_1 *

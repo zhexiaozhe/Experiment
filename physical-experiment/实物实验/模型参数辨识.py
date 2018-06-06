@@ -130,7 +130,7 @@ for step in range(1001):
     # if step<200:
     #     value = 0
     # else:
-    #     value = 6/2.73 * np.sin(0.02*pi * (step-200))
+    #     value = 6/2.73 * np.sin(0.02*pi   * (step-200))
     data0=sgn(value)#转向使能给定
     task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)#数字口发送
     task1.WriteAnalogScalarF64(1, 10.0, abs(value), None)#模拟口发送

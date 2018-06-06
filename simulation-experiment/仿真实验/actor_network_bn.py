@@ -6,8 +6,8 @@ import os
 import shutil
 
 # Hyper Parameters
-LAYER1_SIZE = 40
-LAYER2_SIZE = 30
+LAYER1_SIZE = 400
+LAYER2_SIZE = 300
 LEARNING_RATE = 1e-4
 
 TAU = 0.001
@@ -60,6 +60,7 @@ class ActorNetwork:
 		layer2_bn = self.batch_norm_layer(layer2,training_phase=is_training,scope_bn='batch_norm_2',activation=tf.nn.relu)
 
 		action_output = tf.tanh(tf.matmul(layer2_bn,W3) + b3)
+		# action_output = tf.nn.sigmoid(0.1*(tf.matmul(layer2_bn, W3) + b3))
 
 		return state_input,action_output,[W1,b1,W2,b2,W3,b3],is_training
 
@@ -78,6 +79,7 @@ class ActorNetwork:
 		layer2_bn = self.batch_norm_layer(layer2,training_phase=is_training,scope_bn='target_batch_norm_2',activation=tf.nn.relu)
 
 		action_output = tf.tanh(tf.matmul(layer2_bn,target_net[4]) + target_net[5])
+		# action_output = tf.nn.sigmoid(0.1*(tf.matmul(layer2_bn, target_net[4]) + target_net[5]))
 
 		return state_input,action_output,target_update,is_training
 
@@ -141,6 +143,8 @@ class ActorNetwork:
 		print ('save actor-network...',time_step)
 		self.saver.save(self.sess, 'saved_actor_networks/' + 'actor-network-86', global_step = time_step)
 
+	def close(self):
+		self.sess.close()
 
 
 		

@@ -21,7 +21,7 @@ H=np.ones([PRE_BATCH_SIZE,1])
 class DDPG_DEMO_PRE(object):
     def __init__(self,env):
         self.name = 'DDPG_DEMO'  # name for uploading results
-        self.pre_train_step = 1
+        self.pre_train_step = -1
         self.environment = env
         # Randomly initialize actor network and critic network
         # with both their target networks
@@ -45,19 +45,27 @@ class DDPG_DEMO_PRE(object):
         demo_action_batch = np.resize(demo_action_batch, [PRE_BATCH_SIZE, 1])
 
         #Calculate q_sup
-        action_batch=self.actor_network.target_actions(demo_state_batch)
+        # action_batch=self.actor_network.target_actions(demo_state_batch)
+        action_batch = self.actor_network.actions(demo_state_batch)
         cost=np.mean(np.square(10*(demo_action_batch-action_batch)))
-        q_sup_batch=H*(abs(action_batch-demo_action_batch)<0.1)+self.critic_network.target_q(demo_state_batch,action_batch)
-
+        # q_sup_batch=H*(abs(action_batch-demo_action_batch)>0.1)+self.critic_network.target_q(demo_state_batch,action_batch)
+        q_sup_batch = H * (abs(action_batch - demo_action_batch) > 0.1) + self.critic_network.q_value(demo_state_batch,
+                                                                                                       action_batch)
+        # print(H*(abs(action_batch-demo_action_batch)>0.01))
         # Update critic by minimizing the loss L
         q_sup_batch = np.resize(q_sup_batch, [PRE_BATCH_SIZE, 1])
         self.critic_network.train(q_sup_batch, demo_state_batch, demo_action_batch)
-
+        # print(q_sup_batch[0],self.critic_network.q_value(demo_state_batch, demo_action_batch)[0])
         # Update the actor policy using the sampled gradient:
         action_batch_for_gradients = self.actor_network.actions(demo_state_batch)
         q_gradient_batch = self.critic_network.gradients(demo_state_batch, action_batch_for_gradients)
-        self.actor_network.train(q_gradient_batch, demo_state_batch)
 
+        self.actor_network.train(q_gradient_batch, demo_state_batch)
+        if self.pre_train_step%10000==0:
+            print("动作：",demo_action_batch[0],action_batch[0])
+            print("价值：",self.critic_network.target_q(demo_state_batch,action_batch)[0],self.critic_network.q_value(demo_state_batch,action_batch)[0])
+            print("action_batch_for_gradients:",action_batch_for_gradients[0])
+            print("q_gradient_batch:",q_gradient_batch[0])
         #update network
         self.actor_network.update_target()
         self.critic_network.update_target()
@@ -74,7 +82,8 @@ class DDPG_DEMO_PRE(object):
 
 if __name__=='__main__':
     epsiode=500000
-    ENV_NAME='Acrobot-v1'
+    # ENV_NAME='Acrobot-v1'
+    ENV_NAME = 'Pendulum-v0'
     env = filter_env.makeFilteredEnv(gym.make(ENV_NAME))
     ddpg_demo_agent=DDPG_DEMO_PRE(env)
 

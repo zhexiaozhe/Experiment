@@ -61,6 +61,7 @@ class ActorNetwork:
 		layer2_bn = self.batch_norm_layer(layer2,training_phase=is_training,scope_bn='batch_norm_2',activation=tf.nn.relu)
 
 		action_output = tf.tanh(tf.matmul(layer2_bn,W3) + b3)
+		# action_output = tf.nn.sigmoid(0.1*(tf.matmul(layer2_bn, W3) + b3))
 
 		return state_input,action_output,[W1,b1,W2,b2,W3,b3],is_training
 
@@ -79,6 +80,7 @@ class ActorNetwork:
 		layer2_bn = self.batch_norm_layer(layer2,training_phase=is_training,scope_bn='target_batch_norm_2',activation=tf.nn.relu)
 
 		action_output = tf.tanh(tf.matmul(layer2_bn,target_net[4]) + target_net[5])
+		# action_output = tf.nn.sigmoid(0.1*(tf.matmul(layer2_bn, target_net[4]) + target_net[5]))
 
 		return state_input,action_output,target_update,is_training
 

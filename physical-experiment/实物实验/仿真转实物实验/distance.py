@@ -9,11 +9,12 @@ import math
 import numpy as np
 
 class DISTANCE(object):
-    def __init__(self):
+    def __init__(self,data):
         self.LINK_LENGTH_1=0.593
         self.LINK_LENGTH_2 = 0.593
-        self.theta1d=-np.pi/4
-        self.theta2d=np.pi/2
+        self.theta1d=data[0]
+        self.theta2d=data[1]
+
     def dis(self,s):
         # 模型改目标的位置
         g_p1 = [self.LINK_LENGTH_1 *

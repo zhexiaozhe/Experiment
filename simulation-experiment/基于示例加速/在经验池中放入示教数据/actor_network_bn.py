@@ -5,7 +5,6 @@ import math
 import os
 import shutil
 
-
 # Hyper Parameters
 LAYER1_SIZE = 400
 LAYER2_SIZE = 300
@@ -40,7 +39,6 @@ class ActorNetwork:
 		self.q_gradient_input = tf.placeholder("float",[None,self.action_dim])
 		self.parameters_gradients = tf.gradients(self.action_output,self.net,-self.q_gradient_input)                    #这个地方需要研究一下
 		self.optimizer = tf.train.AdamOptimizer(LEARNING_RATE).apply_gradients(zip(self.parameters_gradients,self.net))
-
 	def create_network(self,state_dim,action_dim):
 		layer1_size = LAYER1_SIZE
 		layer2_size = LAYER2_SIZE
@@ -62,6 +60,7 @@ class ActorNetwork:
 		layer2_bn = self.batch_norm_layer(layer2,training_phase=is_training,scope_bn='batch_norm_2',activation=tf.nn.relu)
 
 		action_output = tf.tanh(tf.matmul(layer2_bn,W3) + b3)
+		# action_output = tf.nn.sigmoid(0.1*(tf.matmul(layer2_bn, W3) + b3))
 
 		return state_input,action_output,[W1,b1,W2,b2,W3,b3],is_training
 
@@ -80,6 +79,7 @@ class ActorNetwork:
 		layer2_bn = self.batch_norm_layer(layer2,training_phase=is_training,scope_bn='target_batch_norm_2',activation=tf.nn.relu)
 
 		action_output = tf.tanh(tf.matmul(layer2_bn,target_net[4]) + target_net[5])
+		# action_output = tf.nn.sigmoid(0.1*(tf.matmul(layer2_bn, target_net[4]) + target_net[5]))
 
 		return state_input,action_output,target_update,is_training
 

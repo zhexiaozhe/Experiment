@@ -1,5 +1,4 @@
 import filter_env
-from ddpg import *
 import time
 from numpy import pi
 # gc is memory manage modle
@@ -8,44 +7,42 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.sans-serif']=['SimHei']#增加中文功能
 plt.rcParams['axes.unicode_minus']=False
 import numpy as np
-# import itchat
 import gym
+from ddpg import *
+
 gc.enable()
 
 ENV_NAME = 'Acrobot-v1'
 # ENV_NAME = 'Pendulum-v0'
-test_name='test 6'
-EPISODES = 4000
+# ENV_NAME = 'MountainCarContinuous-v0'
+test_name='示教实验9'
+EPISODES = 2000
 TEST = 1
 #单目标
 plot_reward=[]
 plot_step=[]
-
 def main():
-    #登录微信,登录时将生成.pkl文件这个文件保存的是登录信息
-    ###################################################
-    # itchat.auto_login(hotReload=True)
-    ###################################################
     env = filter_env.makeFilteredEnv(gym.make(ENV_NAME))
     agent = DDPG(env)
+    # plot_reward = np.zeros((201, 5))
+    # for ex in range(5):
+    #     te = 0
     for episode in range(EPISODES):
-        state = env.reset()
         # Train
-        action_smoothing = 0
+        state = env.reset()
         for step in range(env.spec.timestep_limit): #Pendulum-v0:env.spec.timestep_limit=200
             action = agent.noise_action(state)
             # action_smoothing=np.clip(0.1*action+action_smoothing,env.action_space.low,env.action_space.high)
             next_state,reward,done,_ = env.step(action)
             agent.perceive(state,action,reward,next_state,done) #if env = = cartpole need next_state flatten
             state = next_state
+
             if done:
                 break
 
         # Testing:
-        if (episode+1) % 50 == 0 or episode==0:
+        if (episode+1) % 10 == 0 or episode==0:
             total_reward=0
-            testing_step = 0
-
             for i in range(TEST):
                 state = env.reset()
                 theta2=[]
@@ -75,28 +72,12 @@ def main():
                 energy=[]
                 test_action_smoothing=0
                 for j in range(env.spec.timestep_limit):
-                    env.render()
+                    # env.render()
                     action = agent.action(state)
                     # critic_value=agent.critic(state,action)[0]
-                    # test_action_smoothing=np.clip(0.1*action+test_action_smoothing,env.action_space.low,env.action_space.high)
-                    state,reward,done,inf = env.step(action)
-                    #虚约束与能量结合
-
-                    # PHI.append(inf[3])
-                    # theta1.append(inf[2][0])
-                    # theta2.append(inf[2][1])
-                    # theta1d.append(-pi/4)
-                    # theta2d.append(pi/2)
-                    # Ed.append(inf[6])
-                    # energy.append(inf[5])
-                    # Action.append(action)
-                    # Action_smoothing.append(action_smoothing)
-                    # R1.append(5*inf[0])
-                    # R2.append(inf[1])
-                    # distance.append(inf[4])
-                    # dtheta1.append(inf[2][2])
-                    # dtheta2.append(inf[2][3])
-                    # step.append(j)
+                    # test_action_smoothing=np.clip(0.5*action+0.5*test_action_smoothing,env.action_space.low,env.action_space.high)
+                    # state,reward,done,inf = env.step(test_action_smoothing)
+                    next_state, reward, done, inf = env.step(action)
 
                     #虚约束测试
                     # Action.append(10*action)
@@ -109,24 +90,20 @@ def main():
                     # theta2d.append(pi/2)
                     # step.append(j)
 
-                    #pendulm测试
-                    # step.append(j)
-                    # theta1.append(inf[0])
-                    # dtheta1.append(inf[1])
-                    # Action.append(action)
-                    # Action_smoothing.append(test_action_smoothing)
                     #能量测试
-                    # step.append(j)
-                    # theta1.append(inf[1][0])
-                    # theta2.append(inf[1][1])
-                    # theta2d.append(pi/4)
-                    # theta1d.append(-pi/4)
-                    # dtheta1.append(inf[1][2])
-                    # dtheta2.append(inf[1][3])
-                    # E.append(inf[0])
+                    # step.append(j*0.01)
+                    # theta1.append(inf[0][0])
+                    # theta2.append(inf[0][1])
+                    # dtheta1.append(inf[0][2])
+                    # dtheta2.append(inf[0][3])
                     # Action.append(action)
-                    # Action_smoothing.append(test_action_smoothing)
-                    # Ed.append(inf[2])
+                    # # Action_smoothing.append(test_action_smoothing)
+                    # theta2d.append(inf[1])
+                    # theta1d.append(inf[2])
+                    # E.append(inf[3])
+                    # Ed.append(inf[4])
+                    # distance.append(inf[5])
+
                     # Tau_dtheta1.append(inf[1][2]*action)
                     # Tau_dtheta2.append(inf[1][3]*action)
                     # Q_value.append(critic_value)
@@ -153,34 +130,63 @@ def main():
                     if done:
                          break
                 #保存数据
-                # np.save('data\Theta1_2',np.array(theta1))
-                # np.save('data\Theta2_2',np.array(theta2))
-                # np.save('data\step',np.array(step))
-                # #能量
-                # plt.figure('测试')
-                # plt.plot(step, Tau_dtheta1, label="tau*dt1")
-                # plt.plot(step, Tau_dtheta2, label="tau*dt2")
-                # plt.legend()
+                # np.save(r'F:\python_files\Experiment\physical-experiment\实物实验\仿真转实物实验\open_control\data\torque1.npy',np.array(Action))
+
+                # np.save('data\mid\Theta1',np.array(theta1))
+                # np.save('data\mid\Theta2',np.array(theta2))
+                # np.save('data\mid\Theta1d',np.array(theta1d))
+                # np.save('data\mid\Theta2d', np.array(theta2d))
+                # np.save('data\mid\step',np.array(step))
+                # np.save('data\mid\distance',np.array(distance))
+                # # #能量
                 # plt.figure('响应')
-                # plt.plot(step, theta1, label="Theta1")
-                # plt.plot(step, theta2, label="Theta2")
-                # plt.plot(step, theta2d, label="theta2d")
-                # plt.plot(step, theta1d, label="theta1d")
+                # plt.plot(step, theta1,'r-', label="Theta1")
+                # plt.plot(step, theta2,'b--', label="Theta2")
+                # plt.plot(step, theta1d, 'g-.',label="Theta1d")
+                # plt.plot(step, theta2d, 'c:',label="Theta2d")
+                # plt.xlabel('Time/s')
+                # plt.ylabel('角度（rad）')
+                # plt.grid()
                 # plt.legend()
                 # plt.figure('动作')
                 # plt.plot(step, Action, label="Action")
-                # plt.plot(step, Action_smoothing, label='smooth_action')
+                # # plt.plot(step,Action_smoothing,label="Smoth_Action")
+                # plt.grid()
+                # plt.legend()
+                # plt.figure('角速度')
                 # plt.plot(step, dtheta1, label='dtheta1')
+                # plt.plot(step, dtheta2, label='dtheta2')
+                # plt.grid()
+                # plt.legend()
+                # plt.figure('距离')
+                # plt.plot(step,distance,label="distance")
+                # plt.xlabel('Time/s')
+                # plt.ylabel('距离（m）')
                 # plt.legend()
                 # plt.figure('能量')
                 # plt.plot(step, Ed, label="Ed")
                 # plt.plot(step, E, label="E")
                 # plt.legend()
                 # plt.grid()
+                # plt.show()
+
+                #基于距离和力矩
+                # plt.figure('响应')
+                # plt.plot(step, theta1, label="Theta1")
+                # plt.plot(step, theta2, label="Theta2")
+                # plt.grid()
+                # plt.legend()
+                # plt.figure('动作')
+                # plt.plot(step, Action, label="Action")
+                # plt.grid()
+                # plt.legend()
                 # plt.figure('角速度')
                 # plt.plot(step, dtheta1, label='dtheta1')
                 # plt.plot(step, dtheta2, label='dtheta2')
+                # plt.grid()
                 # plt.legend()
+                # plt.show()
+
                 # plt.figure('奖励')
                 # plt.title(u'奖励')
                 # plt.plot(R1, label='R1')
@@ -194,7 +200,6 @@ def main():
                 # plt.plot(Q_value, label='Q')
                 # plt.legend()
                 # plt.grid()
-                plt.show()
 
                 #虚约束与能量结合
                 # np.save('data/T.npy',np.array(Action_smoothing))
@@ -293,21 +298,17 @@ def main():
             ave_reward = total_reward/TEST
             print('episode: ', episode, 'Evaluation Average Reward:',
                 ave_reward,time.strftime('  %Y-%m-%d %A %X',time.localtime()))
-            # itchat.send("episode:"+str(episode)+",Evaluation Average Reward:"+str(ave_reward))
             #单目标
+            # plot_reward[te][ex]=ave_reward
+            # te+=1
             plot_reward.append(ave_reward)
-            # plot_step.append(ave_step)
     np.save('data\%s.npy'%test_name, np.array(plot_reward))
     plt.figure(1)
     plt.plot(plot_reward)
     plt.grid()
-    plt.xlabel('step')
+    plt.xlabel('episode')
     plt.ylabel('average_reward')
     plt.savefig('figure\%s'%test_name)
-    # time.sleep(10)
-    # itchat.send_image('figure\%s.png'%test_name)
-    # time.sleep(10)
-    # itchat.logout()
     plt.show()
 
 if __name__ == '__main__':

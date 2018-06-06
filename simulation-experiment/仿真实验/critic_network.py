@@ -2,8 +2,8 @@ import tensorflow as tf
 import numpy as np
 import math
 
-LAYER1_SIZE = 40
-LAYER2_SIZE = 30
+LAYER1_SIZE = 400
+LAYER2_SIZE = 300
 LEARNING_RATE = 1e-3
 TAU = 0.001
 L2 = 0.01
@@ -61,6 +61,7 @@ class CriticNetwork:
 		W3 = tf.Variable(tf.random_uniform([layer2_size,1],-3e-3,3e-3))
 		b3 = tf.Variable(tf.random_uniform([1],-3e-3,3e-3))
 
+
 		layer1 = tf.nn.relu(tf.matmul(state_input,W1) + b1)
 		layer2 = tf.nn.relu(tf.matmul(layer1,W2) + tf.matmul(action_input,W2_action) + b2)
 		q_value_output = tf.identity(tf.matmul(layer2,W3) + b3)
@@ -99,8 +100,6 @@ class CriticNetwork:
 		# 										self.action_input:action_batch
 		# 										})
 		# return abs_errors,cost
-
-
 
 	def gradients(self,state_batch,action_batch):
 		return self.sess.run(self.action_gradients,feed_dict={
@@ -147,3 +146,6 @@ class CriticNetwork:
 		# self.saver = tf.train.Saver(self.net)
 		print ('save critic-network...',time_step)
 		self.saver.save(self.sess, 'saved_critic_networks/' + 'critic-network-86', global_step = time_step)
+
+	def close(self):
+		self.sess.close()

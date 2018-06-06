@@ -10,7 +10,7 @@ import numpy as np
 import scipy.io as sio
 
 #matlab数据读取
-dataFile = u'F:/matlab_files/q.mat'
+dataFile = u'F:/matlab_files/local_q.mat'
 # data = sio.loadmat(dataFile)
 # print(type(data))
 # print(data['ans'])

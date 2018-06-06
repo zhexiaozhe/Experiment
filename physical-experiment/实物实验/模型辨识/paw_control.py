@@ -13,7 +13,7 @@ import numpy as np
 task0 = Task()
 task0.CreateDOChan("/Dev2/port0/line0:7","",PyDAQmx.DAQmx_Val_ChanForAllLines)
 task0.StartTask()
-data=data0=np.array([0,0,0,0,0,0,0,0],dtype=np.uint8)
+data0=np.array([0,0,0,0,0,0,0,0],dtype=np.uint8)
 
 #############手柄##############
 pygame.init()

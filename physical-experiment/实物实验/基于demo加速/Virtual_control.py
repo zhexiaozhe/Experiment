@@ -15,11 +15,11 @@ class CONTROL:
     #系统参数
     LINK_LENGTH_1 = 0.593
     LINK_LENGTH_2 = 0.593
-    LINK_MASS_1 = 2.73
-    LINK_MASS_2 = 1.68
-    LINK_COM_POS_1 = 0.4
+    LINK_MASS_1 = 2.78
+    LINK_MASS_2 = 1.73
+    LINK_COM_POS_1 = 0.3
     LINK_MOI1 = 0.25
-    LINK_COM_POS_2 = 0.377
+    LINK_COM_POS_2 = 0.4
     LINK_MOI2 = 0.116
     MU11 = 0.205
     MU12 = 0.184

@@ -9,21 +9,30 @@ import gym
 import time
 import numpy as np
 import math
+import matplotlib
 import matplotlib.pyplot as plt
 
-# env=gym.make('Acrobot-v1')
-env=gym.make('Pendulum-v0')
+env=gym.make('Acrobot-v1')
+# env=gym.make('Pendulum-v0')
 # env=gym.make('Pendulum-v0')
 env.reset()
-
+env=env.unwrapped
 theta1=[]
 theta2=[]
 dtheta1=[]
 dtheta2=[]
+
 for step in range(env.spec.timestep_limit):
-    env.render()
-    # time.sleep(100)
-    ob,r,done,inf=env.step([0])
+    image=env.render(mode='rgb_array')
+
+    print(np.shape(image))
+    time.sleep(0.1)
+    action=[0]
+    ob,r,done,inf=env.step(action)
+    if done:
+        time.sleep(10)
+        break
+    matplotlib.image.imsave(r'figure\name.png', image)
     # theta1.append(inf[1][0])
     # theta2.append(inf[1][1])
     # dtheta1.append(inf[1][2])
@@ -39,4 +48,3 @@ for step in range(env.spec.timestep_limit):
 # plt.plot(dtheta1)
 # plt.plot(dtheta2)
 # plt.show()
-

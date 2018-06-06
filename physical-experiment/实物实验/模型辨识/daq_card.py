@@ -14,10 +14,10 @@ class DAQ():
     def __init__(self):
         try:
             #使能控制
-            self.sgn = lambda x: np.array([0, 1, 0, 0, 0, 0, 0, 0], dtype=np.uint8) if x > 0 else np.array(
-                [1, 0, 0, 0, 0, 0, 0, 0],dtype=np.uint8) if x < 0 else np.array([0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8)
+            self.sgn = lambda x: np.array([0, 1], dtype=np.uint8) if x > 0 else np.array(
+                                         [1, 0],dtype=np.uint8) if x < 0 else np.array([0, 0], dtype=np.uint8)
             self.task0 = Task()
-            self.task0.CreateDOChan("/Dev2/port0/line0:7", "", PyDAQmx.DAQmx_Val_ChanForAllLines)
+            self.task0.CreateDOChan("/Dev2/port0/line0:1", "", PyDAQmx.DAQmx_Val_ChanForAllLines)
             #模拟量输出
             self.task1 = Task()
             self.task1.CreateAOVoltageChan("/Dev2/ao0", "", 0, 5, PyDAQmx.DAQmx_Val_Volts, None)
@@ -71,6 +71,7 @@ class DAQ():
 
     def stop(self):
         data0 = np.array([0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8)
+        self.task1.WriteAnalogScalarF64(1, 10.0, 0, None)
         self.task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)
         self.task0.StopTask()
         self.task1.StopTask()

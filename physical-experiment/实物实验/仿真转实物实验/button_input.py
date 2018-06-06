@@ -16,7 +16,7 @@ class BUTTON(object):
         self.data3 = numpy.zeros((3,), dtype=numpy.uint8)
         self.task0.CreateDIChan("/Dev2/port1/line0:3","",PyDAQmx.DAQmx_Val_ChanForAllLines)
         self.task0.StartTask()
-        print('松开按钮执行控制程序')
+        print('拉倒释放位置,松开按钮执行控制程序')
 
     def state(self):
         self.task0.ReadDigitalU8(1, 10.0, DAQmx_Val_GroupByChannel, self.data3, 3, byref(self.read3), None)

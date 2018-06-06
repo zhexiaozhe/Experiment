@@ -8,7 +8,6 @@ LEARNING_RATE = 1e-3
 TAU = 0.001
 L2 = 0.01
 
-
 class CriticNetwork:
 	"""docstring for CriticNetwork"""
 	def __init__(self,sess,state_dim,action_dim,load):
@@ -41,8 +40,10 @@ class CriticNetwork:
 		self.y_input = tf.placeholder("float",[None,1])
 		weight_decay = tf.add_n([L2 * tf.nn.l2_loss(var) for var in self.net])
 		self.cost = tf.reduce_mean(tf.square(self.y_input - self.q_value_output)) + weight_decay
+		##PER
 		# self.abs_errors = tf.reduce_sum(tf.abs(self.y_input - self.q_value_output), axis=1)
 		# self.cost = tf.reduce_mean(self.ISWeights * tf.square(self.y_input - self.q_value_output)) + weight_decay
+		###
 		self.optimizer = tf.train.AdamOptimizer(LEARNING_RATE).minimize(self.cost)
 		self.action_gradients = tf.gradients(self.q_value_output,self.action_input)
 
@@ -85,13 +86,23 @@ class CriticNetwork:
 	def update_target(self):
 		self.sess.run(self.target_update)
 
-	def train(self,y_batch,state_batch,action_batch):
+	def train(self,y_batch, state_batch, action_batch):
 		self.time_step += 1
 		self.sess.run(self.optimizer,feed_dict={
 										self.y_input:y_batch,
 										self.state_input:state_batch,
 										self.action_input:action_batch
 										})
+		###PER
+	# def train(self,ISweights,y_batch,state_batch,action_batch):
+	# 	self.time_step += 1
+		# _, abs_errors, cost =self.sess.run([self.optimizer, self.abs_errors, self.cost],feed_dict={
+		# 										self.ISWeights:ISweights,
+		# 										self.y_input:y_batch,
+		# 										self.state_input:state_batch,
+		# 										self.action_input:action_batch
+		# 										})
+		# return abs_errors,cost
 
 	def gradients(self,state_batch,action_batch):
 		return self.sess.run(self.action_gradients,feed_dict={
@@ -122,7 +133,6 @@ class CriticNetwork:
 	def load_network(self):
 		# 整体加载
 		self.saver = tf.train.Saver()
-		# 分开加载
 		checkpoint = tf.train.get_checkpoint_state("saved_critic_networks")
 		if checkpoint and checkpoint.model_checkpoint_path:
 			self.saver.restore(self.sess, checkpoint.model_checkpoint_path)
@@ -133,7 +143,5 @@ class CriticNetwork:
 	def save_network(self,time_step,name):
 		#整体保存
 		self.saver = tf.train.Saver()
-		#分开保存
-		# self.saver = tf.train.Saver(self.net)
 		print ('save critic-network...',time_step)
 		self.saver.save(self.sess, 'saved_critic_networks/' + 'critic-network-86', global_step = time_step)

@@ -14,7 +14,7 @@ from PyDAQmx import *
 
 class CONTROL(object):
     def __init__(self):
-        self.ser = serial.Serial('com11', 115200)
+        self.ser = serial.Serial('com3', 115200)
         # 使能控制
         self.sgn = lambda x: np.array([0, 1], dtype=np.uint8) if x > 0 else np.array(
                                         [1, 0], dtype=np.uint8) if x < 0 else np.array([0, 0], dtype=np.uint8)
@@ -132,9 +132,11 @@ class CONTROL(object):
     def state_pre(self,s):
         MAX_VEL_1 = 4 * pi
         MAX_VEL_2 = 9 * pi
-        # 角度处理
-        s[0] = self.wrap(s[0], -pi, pi)
+        # 角度和角速度处理
+        s[0] = self.wrap(s[0], -1.2*pi, pi)
         s[1] = self.wrap(s[1], -pi, pi)
         s[2] = self.bound(s[2], -MAX_VEL_1, MAX_VEL_1)
         s[3] = self.bound(s[3], -MAX_VEL_2, MAX_VEL_2)
+        s[2]=s[2]/(4*pi)
+        s[3]=s[3]/(9*pi)
         return np.array([cos(s[0]), sin(s[0]), cos(s[1]), sin(s[1]), s[2], s[3]])

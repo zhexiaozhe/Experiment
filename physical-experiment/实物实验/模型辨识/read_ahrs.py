@@ -12,7 +12,7 @@ import sys
 class READ_AHRS():
     def __init__(self):
         try:
-            self.ser=ser=serial.Serial('com11',115200)
+            self.ser=ser=serial.Serial('com3',115200)
             print("姿态位移传感器连接成功")
         except:
             print("姿态位移传感器连接失败")

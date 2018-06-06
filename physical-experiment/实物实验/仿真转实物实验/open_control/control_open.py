@@ -5,7 +5,9 @@
 @time: 2018/3/28 9:12
 '''
 import pygame
+import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 from PyDAQmx import *
 from button_input import *
@@ -56,15 +58,51 @@ if __name__=='__main__':
     sen = CONTROL()
     sen.start()
     d=DISTANCE()
-
+    Action=np.load(r'data\torque1.npy')
     data0 = np.array([1, 0, 0, 0, 0, 0], dtype=np.uint8)
-    while True:
+    start=time.clock()
+    Dis=[]
+    T_get=[]
+    T_send=[]
+    Theta1=[]
+    Theta2=[]
+    step=0
+    for action in Action:
         # 系统状态采集
         angle1, angle_velocity1 = sen.read_ahrs()
-        angle2, angle_velocity2, toqure = sen.read_daq()
+        angle2, angle_velocity2, torque = sen.read_daq()
         state=[angle1,angle2]
+        Theta1.append(state[0])
+        Theta2.append(state[1])
         D=d.dis(state)
-        #控制手抓开合
+        T_send.append(10*action)
+        if step > 0:
+            T_get.append(torque)
+        step += 1
+        Dis.append(D)
+        print('步数：',step,'距离：',D)
+        # 发送控制力矩
+        sen.write_daq(10/2.73*action)
+        # 控制手抓开合
+        if D<=0.1:
+            data0 = np.array([0, 0, 0, 0, 0, 0], dtype=np.uint8)
+            task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)
+            break
         task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)
+    print('时间：',time.clock()-start)
+    sen.stop()
 
+    plt.figure('姿态')
+    plt.plot(Theta1,label='Theta1')
+    plt.plot(Theta2,label='Theta2')
+    plt.legend()
 
+    plt.figure('距离')
+    plt.plot(Dis, label="distance")
+    plt.legend()
+
+    plt.figure('动作')
+    plt.plot(T_send,label="Torque_send")
+    plt.plot(T_get, label="Torque_get")
+    plt.legend()
+    plt.show()
