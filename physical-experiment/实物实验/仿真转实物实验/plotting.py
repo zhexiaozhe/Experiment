@@ -19,7 +19,7 @@ class PLOT():
         Angle_velocity2=data[3]
         T_send = data[4]
         T_collect =data[5]
-        Distance=data[6]
+        Distance=data[6]-0.02
         Theta1d=data[7]
         Theta2d=data[8]
 
@@ -27,8 +27,8 @@ class PLOT():
         plt.title('Action Experiment')
         plt.xlabel('Step/0.02s')
         plt.ylabel('Torque/N.m')
-        plt.plot(T_collect[1:], 'r--', label='collect torque')
-        plt.plot(T_send, 'b-', label='send torque')
+        # plt.plot(T_collect[1:], 'r--', label='collect torque')
+        plt.plot(T_send, 'b-', label='torque')
         plt.grid()
         plt.legend()
 
@@ -53,7 +53,7 @@ class PLOT():
         plt.legend()
 
         plt.figure('距离曲线')
-        plt.title('Distance Experiment')
+        # plt.title('Distance Experiment')
         plt.xlabel('Step/0.02s')
         plt.ylabel('distance/m')
         plt.plot(Distance, 'b-', label='distance')

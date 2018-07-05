@@ -12,9 +12,8 @@ gc.enable()
 ENV_NAME = 'Acrobot-v1'
 # ENV_NAME='Pendulum-v0'
 # ENV_NAME='MountainCarContinuous-v0'
-test_name='PER实验8'
+test_name='per实验7'
 EPISODES = 2000
-PER_TRAIN=50000
 TEST = 1
 plot_reward=[]
 
@@ -22,11 +21,6 @@ def main():
     env = filter_env.makeFilteredEnv(gym.make(ENV_NAME))
     agent = DDPG(env)
     total_step = 0
-    agent.per_add()
-    for per_train in range(PER_TRAIN):
-        agent.per_train()
-    print('预训练完成')
-
     for episode in range(EPISODES):
         # Training
         state = env.reset()

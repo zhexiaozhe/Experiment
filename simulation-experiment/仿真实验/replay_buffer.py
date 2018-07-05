@@ -4,7 +4,6 @@ import numpy as np
 import time
 import pickle
 
-# 原来的代码，没有优先采用
 class ReplayBuffer(object):
     def __init__(self, buffer_size):
 

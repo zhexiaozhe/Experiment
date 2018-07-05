@@ -26,9 +26,9 @@ class DDPG:
         self.state_dim = env.observation_space.shape[0]
         self.action_dim = env.action_space.shape[0]
         self.time_step=1
-        self.save_network=False
-        self.actor_load=False
-        self.critic_load=False
+        self.save_network=True
+        self.actor_load=True
+        self.critic_load=True
         self.exploration_tatio=1
         self.sess=tf.Session()
         self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim, self.actor_load)

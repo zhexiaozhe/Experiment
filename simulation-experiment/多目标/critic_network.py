@@ -83,7 +83,6 @@ class CriticNetwork:
 
 	def train(self,y_batch,state_batch,action_batch):
 		self.time_step += 1
-
 		self.sess.run(self.optimizer,feed_dict={
 										self.y_input:y_batch,
 										self.state_input:state_batch,

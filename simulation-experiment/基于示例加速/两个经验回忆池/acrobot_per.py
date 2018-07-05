@@ -14,7 +14,7 @@ ENV_NAME = 'Acrobot-v1'
 # ENV_NAME='MountainCarContinuous-v0'
 test_name='PER实验8'
 EPISODES = 2000
-PER_TRAIN=50000
+PER_TRAIN=20000
 TEST = 1
 plot_reward=[]
 

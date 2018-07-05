@@ -85,50 +85,93 @@ class PrioritizedReplayBuffer(object):
 
     def __init__(self, buffer_size,demo):
 
-        self.buffer_size = buffer_size
-        self.tree = SumTree(self.buffer_size)
-        self.num_experiences = 0
+        self.intera_buffer_size=buffer_size
+        self.demo_buffer_size = buffer_size
+        self.intera_tree = SumTree(self.intera_buffer_size)
+        self.demo_tree=SumTree(self.demo_buffer_size)
+        self.intera_num_experiences = 0
+        self.demo_num_experiences=0
         if demo:
             print('使用优先采用并加载数据实验')
-
-    def add(self, state, action, reward, new_state, done):
+    #交互数据操作
+    def intera_add(self, state, action, reward, new_state, done):
         experience = (state, action, reward, new_state, done)
-        self.num_experiences += 1
-        max_p = np.max(self.tree.tree[-self.tree.capacity:])
+        self.intera_num_experiences += 1
+        max_p = np.max(self.intera_tree.tree[-self.intera_tree.capacity:])
         if max_p == 0:
             max_p = self.abs_err_upper
-        self.tree.add(max_p, experience)  # set the max p for new p 设置最大的概率给新的数据
+        self.intera_tree.add(max_p, experience)  # set the max p for new p 设置最大的概率给新的数据
 
-    def sample(self, n):
+    def intera_sample(self, n):
         self.b_idx, self.b_memory, self.ISWeights,pri= np.empty((n,), dtype=np.int32), np.zeros(n, dtype=object), np.empty((n, 1)),np.empty((n, 1))
-        pri_seg = self.tree.total_p / n       # priority segment
+        pri_seg = self.intera_tree.total_p / n       # priority segment
         self.beta = np.min([1., self.beta + self.beta_increment_per_sampling])  # max = 1
-        min_prob = np.min(self.tree.tree[-self.tree.capacity:]) / self.tree.total_p     # for later calculate ISweight
+        min_prob = np.min(self.intera_tree.tree[-self.intera_tree.capacity:]) / self.intera_tree.total_p     # for later calculate ISweight
         for i in range(n):
             a, b = pri_seg * i, pri_seg * (i + 1) #确定每个区间的上下限
             v = np.random.uniform(a, b) #在区间内进行随机选数
-            idx, p, data = self.tree.get_leaf(v) #获取数据
+            idx, p, data = self.intera_tree.get_leaf(v) #获取数据
             pri[i, 0] = p
-            prob = p / self.tree.total_p
+            prob = p / self.intera_tree.total_p
             self.ISWeights[i, 0] = np.power(prob/min_prob, -self.beta)
             self.b_idx[i], self.b_memory[i] = idx, data
 
         return self.b_idx, self.b_memory, self.ISWeights,pri
 
-    def batch_update(self, tree_idx, abs_errors):
+    def intera_batch_update(self, tree_idx, abs_errors):
         abs_errors += self.epsilon  # convert to abs and avoid 0
         clipped_errors = np.minimum(abs_errors, self.abs_err_upper)
         ps = np.power(clipped_errors, self.alpha)
         for ti, p in zip(tree_idx, ps):
-            self.tree.update(ti, p)
+            self.intera_tree.update(ti, p)
 
-    def count(self):
+    def intera_count(self):
         # if buffer is full, return buffer size
         # otherwise, return experience counter
-        return self.num_experiences
+        return self.intera_num_experiences
 
-    def erase(self):
-        self.num_experiences = 0
+    def intera_erase(self):
+        self.intera_num_experiences = 0
+
+    #示教数据操作
+    def demo_add(self, state, action, reward, new_state, done):
+        experience = (state, action, reward, new_state, done)
+        self.demo_num_experiences += 1
+        max_p = np.max(self.demo_tree.tree[-self.demo_tree.capacity:])
+        if max_p == 0:
+            max_p = self.abs_err_upper
+        self.demo_tree.add(max_p, experience)  # set the max p for new p 设置最大的概率给新的数据
+
+    def demo_sample(self, n):
+        self.b_idx, self.b_memory, self.ISWeights,pri= np.empty((n,), dtype=np.int32), np.zeros(n, dtype=object), np.empty((n, 1)),np.empty((n, 1))
+        pri_seg = self.demo_tree.total_p / n       # priority segment
+        self.beta = np.min([1., self.beta + self.beta_increment_per_sampling])  # max = 1
+        min_prob = np.min(self.demo_tree.tree[-self.demo_tree.capacity:]) / self.demo_tree.total_p     # for later calculate ISweight
+        for i in range(n):
+            a, b = pri_seg * i, pri_seg * (i + 1) #确定每个区间的上下限
+            v = np.random.uniform(a, b) #在区间内进行随机选数
+            idx, p, data = self.demo_tree.get_leaf(v) #获取数据
+            pri[i, 0] = p
+            prob = p / self.demo_tree.total_p
+            self.ISWeights[i, 0] = np.power(prob/min_prob, -self.beta)
+            self.b_idx[i], self.b_memory[i] = idx, data
+
+        return self.b_idx, self.b_memory, self.ISWeights,pri
+
+    def demo_batch_update(self, tree_idx, abs_errors):
+        abs_errors += self.epsilon  # convert to abs and avoid 0
+        clipped_errors = np.minimum(abs_errors, self.abs_err_upper)
+        ps = np.power(clipped_errors, self.alpha)
+        for ti, p in zip(tree_idx, ps):
+            self.demo_tree.update(ti, p)
+
+    def demo_count(self):
+        # if buffer is full, return buffer size
+        # otherwise, return experience counter
+        return self.demo_num_experiences
+
+    def demo_erase(self):
+        self.intera_num_experiences = 0
 
 # 原来的代码，没有优先采用
 class ReplayBuffer(object):

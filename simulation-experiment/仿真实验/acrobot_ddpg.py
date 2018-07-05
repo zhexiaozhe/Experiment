@@ -9,10 +9,10 @@ plt.rcParams['font.sans-serif']=['SimHei']#增加中文功能
 plt.rcParams['axes.unicode_minus']=False
 gc.enable()
 
-# ENV_NAME = 'Acrobot-v1'
-ENV_NAME = 'Pendulum-v0'
+ENV_NAME = 'Acrobot-v1'
+# ENV_NAME = 'Pendulum-v0'
 # ENV_NAME = 'MountainCarContinuous-v0'
-test_name='示教实验9'
+test_name='论文实验1'
 EPISODES = 2000
 TEST = 1
 
