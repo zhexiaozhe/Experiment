@@ -78,21 +78,21 @@ class SumTree(object):
 class PrioritizedReplayBuffer(object):
 
     epsilon = 0.01  # small amount to avoid zero priority 一个小数避免零的优先级
-    alpha = 0.6  # [0~1] convert the importance of TD error to priority 转换TD误差为优先级
-    beta = 0.4  # importance-sampling, from initial value increasing to 1 重要性采样
-    beta_increment_per_sampling = 0.00001  # beta的每次采样后增加的数
+    alpha = 0.4  # [0~1] convert the importance of TD error to priority 转换TD误差为优先级
+    beta = 0.6  # importance-sampling, from initial value increasing to 1 重要性采样
+    beta_increment_per_sampling = 0.000002  # beta的每次采样后增加的数
     abs_err_upper = 1.  # clipped abs error 绝对误差上限
 
-    def __init__(self, buffer_size,demo):
+    def __init__(self, demo_buffer_size,intera_buffer_size,demo):
 
-        self.intera_buffer_size=buffer_size
-        self.demo_buffer_size = buffer_size
+        self.intera_buffer_size=intera_buffer_size
+        self.demo_buffer_size = demo_buffer_size
         self.intera_tree = SumTree(self.intera_buffer_size)
         self.demo_tree=SumTree(self.demo_buffer_size)
         self.intera_num_experiences = 0
         self.demo_num_experiences=0
         if demo:
-            print('使用优先采用并加载数据实验')
+            print('使用优先采样并加载数据实验')
     #交互数据操作
     def intera_add(self, state, action, reward, new_state, done):
         experience = (state, action, reward, new_state, done)

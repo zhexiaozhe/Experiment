@@ -4,6 +4,7 @@ import gc
 import matplotlib.pyplot as plt
 import numpy as np
 import gym
+from numpy import sin,pi
 from ddpg import *
 plt.rcParams['font.sans-serif']=['SimHei']#增加中文功能
 plt.rcParams['axes.unicode_minus']=False
@@ -12,9 +13,9 @@ gc.enable()
 ENV_NAME = 'Acrobot-v1'
 # ENV_NAME='Pendulum-v0'
 # ENV_NAME='MountainCarContinuous-v0'
-test_name='PER实验8'
+test_name='毕业实验12'
 EPISODES = 2000
-PER_TRAIN=20000
+PER_TRAIN=50000
 TEST = 1
 plot_reward=[]
 
@@ -23,9 +24,10 @@ def main():
     agent = DDPG(env)
     total_step = 0
     agent.per_add()
-    for per_train in range(PER_TRAIN):
-        agent.per_train()
-    print('预训练完成')
+    # 预训练过程只是对示教的数据进行优先级确定，不进行网络的训练
+    # for per_train in range(PER_TRAIN):
+    #     agent.per_train()
+    # print('预训练完成')
 
     for episode in range(EPISODES):
         # Training
@@ -46,7 +48,11 @@ def main():
                 state = env.reset()
                 for j in range(env.spec.timestep_limit):
                     env.render()
-                    action = agent.action(state)
+                    if j<700:
+                        action=0.47 * sin(0.01*pi * j)
+                    else:
+                        action = agent.action(state)
+                    print(action)
                     state, reward, done, inf = env.step(action)
                     total_reward += reward
                     if done:
@@ -55,6 +61,7 @@ def main():
             print('episode: ', episode, 'total_step:',total_step,' Evaluation Average Reward:',
                 ave_reward,time.strftime('  %Y-%m-%d %A %X',time.localtime()))
             plot_reward.append(ave_reward)
+
     np.save('data\%s.npy'%test_name, np.array(plot_reward))
     plt.figure(1)
     plt.plot(plot_reward)

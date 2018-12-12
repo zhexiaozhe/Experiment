@@ -7,34 +7,31 @@
 import time
 
 from numpy import pi,sin
-from read_ahrs import READ_AHRS
-from daq_card import DAQ
+from sensor import CONTROL
 from save_data import SAVE_DATA
 from plotting import PLOT
 from hand_shank import HAND_SHANK
 
 def main():
-    SER=READ_AHRS()
-    daq=DAQ()
-    daq.start()
+    sen = CONTROL()
+    sen.start()
     save_data=SAVE_DATA()
     start_time = time.clock()
     plt=PLOT()
     hand=HAND_SHANK()
     for step in range(1000):
-    #     if step < 200:
-    #         value = 0
-    #     else:
-    #         value = 6/2.73 * sin(0.01*pi * (step-200))
-        value=hand.control
-        print(value)
-        daq.write_data(value)
-        angle1,angle_velocity1=SER.read()
-        angle2,angle_velocity2,toqure=daq.read_data()
+        if step < 200:
+            value = 0
+        else:
+            value = 7/2.73 * sin(0.01*pi * (step-200))
+        # value=hand.control
+        sen.write_daq(value)
+        angle1, angle_velocity1 = sen.read_ahrs()
+        angle2, angle_velocity2, torque = sen.read_daq()
         t=time.clock() - start_time
-        data=[angle1,angle2,angle_velocity1,angle_velocity2,value,toqure,t]
+        data=[angle1,angle2,angle_velocity1,angle_velocity2,value,torque,t]
         save_data.recorde(data)
-    daq.stop()
+    sen.stop()
     save_data.save_to_file()
     plt.plot(save_data.load())
 

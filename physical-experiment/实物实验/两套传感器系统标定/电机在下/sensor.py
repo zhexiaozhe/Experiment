@@ -10,10 +10,11 @@ import PyDAQmx
 import serial
 import binascii
 from numpy import pi,sin,cos
+from hand_shank import HAND_SHANK
 
 class CONTROL(object):
     def __init__(self):
-        self.ser = serial.Serial('com4', 115200)
+        self.ser = serial.Serial('com11', 115200)
         # 使能控制
         self.sgn = lambda x: np.array([0, 1], dtype=np.uint8) if x > 0 else np.array(
                                         [1, 0], dtype=np.uint8) if x < 0 else np.array([0, 0], dtype=np.uint8)
@@ -141,10 +142,11 @@ class CONTROL(object):
 if __name__=='__main__':
     sen=CONTROL()
     sen.start()
+    hand = HAND_SHANK()
     for step in range(1000):
         angle1, angle_velocity1 = sen.read_ahrs()
         angle2, angle_velocity2, torque = sen.read_daq()
-        value=-2.5
+        value=0
         sen.write_daq(value)
         print("角度1：%s 角度2：%s 角速度1：%s 角速度2：%s"%(angle1,angle2,angle_velocity1,angle_velocity2))
     sen.stop()

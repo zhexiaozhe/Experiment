@@ -29,7 +29,7 @@ class SumTree(object):
 
         self.data_pointer += 1
         if self.data_pointer >= self.capacity:  # replace when exceed the capacity
-            self.data_pointer = 0
+            self.data_pointer = int(0.2*self.capacity)
 
     # 当 sample 被 train, 有了新的 TD-error, 就在 tree 中更新
     def update(self, tree_idx, p):

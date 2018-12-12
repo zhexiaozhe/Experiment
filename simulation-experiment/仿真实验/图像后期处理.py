@@ -8,6 +8,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
+import scipy.io as sio
 # data=np.load(u'data/ex67.npy')
 # D = mpimg.imread('D.png')
 # plt.imshow(D)
@@ -15,10 +16,17 @@ import numpy as np
 # plt.plot(data)
 # plt.show()
 
-x=np.arange(0,2000,50)
+# x=np.arange(0,4100,100)
 
-y=np.load('data\mid\中期实验2.npy')
-plt.plot(x,y[0:40])
-plt.grid()
-# plt.plot(y)
+dataFile = u'F:/matlab_files/中期实验3.mat'
+y=np.load('data\中期实验4.npy')
+# theta1=np.load('data\mid\Theta1.npy')
+# theta2=np.load('data\mid\Theta2.npy')
+# theta1d=np.load('data\mid\Theta1d.npy')
+# theta2d=np.load('data\mid\Theta2d.npy')
+# sio.savemat(dataFile, {'Theta1':theta1,'Theta2':theta2,'Theta2d':theta2d,'Theta1d':theta1d})
+# sio.savemat(dataFile, {'Y':y})
+# plt.plot(x,y[0:41])
+plt.plot(y)
+# plt.grid()
 plt.show()

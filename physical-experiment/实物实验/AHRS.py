@@ -5,7 +5,7 @@ import time
 import numpy as np
 class AHRS_OLD(object):
     def __init__(self):
-        self.ser=serial.Serial('com3',115200)
+        self.ser=serial.Serial('com11',115200)
     def read(self):
         b = []
         b1=[]

@@ -20,10 +20,10 @@ plt.rcParams['axes.unicode_minus']=False
 # plt.ylabel('loss')
 # plt.show()
 
-dataFile = u'F:/matlab_files/PER实验15.mat'
+dataFile = u'F:/matlab_files/PER实验13.mat'
 
-a0=np.load("data\PER实验15.npy")
+a0=np.load("data\PER实验13.npy")
 # a1=np.load("data\Theta2.npy")
 # a3=np.load("data\Time.npy")
 
-sio.savemat(dataFile, {'value15':a0})
+sio.savemat(dataFile, {'value13':a0})

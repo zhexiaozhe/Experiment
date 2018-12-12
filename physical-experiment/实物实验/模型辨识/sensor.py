@@ -13,7 +13,7 @@ from numpy import pi,sin,cos
 
 class CONTROL(object):
     def __init__(self):
-        self.ser = serial.Serial('com3', 115200)
+        self.ser = serial.Serial('com11', 115200)
         # 使能控制
         self.sgn = lambda x: np.array([0, 1], dtype=np.uint8) if x > 0 else np.array(
                                         [1, 0], dtype=np.uint8) if x < 0 else np.array([0, 0], dtype=np.uint8)
@@ -69,7 +69,7 @@ class CONTROL(object):
         # 转换成弧度制
         roll = roll * pi / 180
         dr = dr * pi / 180
-        return (roll, -dr)
+        return (-roll, dr)
 
     def start(self):
         # 开启任务
@@ -97,10 +97,10 @@ class CONTROL(object):
         self.pre_data2 = self.data2[0]
         # 扭矩采集
         self.torque = self.data3[1] * 2.73 - self.begin_torque
-        return (self.angle2[0],self.angle_velocity2,self.torque)
+        return (-self.angle2[0],-self.angle_velocity2,-self.torque)
 
     def write_daq(self,value):
-        data0 = self.sgn(value)  # 转向使能给定
+        data0 = self.sgn(-value)  # 转向使能给定
         self.task0.WriteDigitalLines(1, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data0, None, None)  # 数字口发送
         self.task1.WriteAnalogScalarF64(1, 10.0, abs(value), None)
 

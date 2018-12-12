@@ -12,7 +12,7 @@ from actor_network_bn import ActorNetwork
 from replay_buffer import ReplayBuffer,PrioritizedReplayBuffer
 
 # Hyper Parameters:
-REPLAY_BUFFER_SIZE = 100000
+REPLAY_BUFFER_SIZE = 200000
 REPLAY_START_SIZE = 10000
 BATCH_SIZE = 64
 GAMMA = 0.99
@@ -30,8 +30,8 @@ class DDPG:
         self.save_network=True
         self.actor_load=False
         self.critic_load=False
-        self.priority=False
-        self.demo=False
+        self.priority=True
+        self.demo=True
         self.exploration_tatio=1
         self.sess=tf.Session()
         self.actor_network = ActorNetwork(self.sess, self.state_dim, self.action_dim, self.actor_load)
@@ -122,7 +122,7 @@ class DDPG:
         self.replay_buffer.batch_update(tree_idx, abs_errors)
 
     def per_add(self):
-        with open('data\object.pickle', 'rb') as f:
+        with open('data\毕业实验11.pickle', 'rb') as f:
             self.buffer = pickle.load(f)
             print("数据加载完成")
         for i in range(REPLAY_BUFFER_SIZE):

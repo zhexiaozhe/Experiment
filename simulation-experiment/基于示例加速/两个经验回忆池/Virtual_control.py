@@ -113,7 +113,7 @@ if __name__ == '__main__':
     Action=[]
     Action_smoothing=[]
     Tau_theta1=[]
-    for _ in range(200):
+    for _ in range(500):
         state = env.reset()
         print(_)
         for step in range(1000):

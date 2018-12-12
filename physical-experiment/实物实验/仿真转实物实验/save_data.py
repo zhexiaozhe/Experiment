@@ -17,6 +17,7 @@ class SAVE_DATA(object):
         self.DIS=[]
         self.Theta1d=[]
         self.Theta2d=[]
+        self.Time=[]
 
     def recorde(self,data):
         Theta1=data[0]
@@ -27,9 +28,10 @@ class SAVE_DATA(object):
         dtheta2=data[3]
         T_send = data[4]
         T_collect = data[5]
-        dis=data[7]
-        theta1d=data[8]
-        theta2d=data[9]
+        dis=data[6]
+        theta1d=data[7]
+        theta2d=data[8]
+        time=data[9]*0.01
 
         self.T_collect.append(T_collect)
         self.T_send.append(2.73*T_send)
@@ -40,6 +42,7 @@ class SAVE_DATA(object):
         self.DIS.append(dis)
         self.Theta1d.append(theta1d)
         self.Theta2d.append(theta2d)
+        self.Time.append(time)
 
     def save_to_file(self):
         np.save('data\Theta1.npy', np.array(self.Theta1))
@@ -51,7 +54,7 @@ class SAVE_DATA(object):
         np.save('data\distance.npy', np.array(self.DIS))
         np.save('data\Theta1d.npy', np.array(self.Theta1d))
         np.save('data\Theta2d.npy', np.array(self.Theta2d))
-
+        np.save('data\Time.npy',np.array(self.Time))
         print('数据保存成功')
 
     def load(self):

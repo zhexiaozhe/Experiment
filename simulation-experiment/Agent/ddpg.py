@@ -17,7 +17,6 @@ BATCH_SIZE = 64
 GAMMA = 0.99
 
 class DDPG:
-    """docstring for DDPG"""
     def __init__(self, env):
         self.name = 'DDPG' # name for uploading results
         self.environment = env
@@ -26,7 +25,7 @@ class DDPG:
         self.state_dim = env.observation_space.shape[0]
         self.action_dim = env.action_space.shape[0]
         self.time_step=1
-        self.save_network=False
+        self.save_network=True
         self.actor_load=True
         self.critic_load=True
         self.exploration_tatio=1
@@ -39,11 +38,12 @@ class DDPG:
 
         # Initialize a random process the Ornstein-Uhlenbeck process for action exploration
         self.exploration_noise = OUNoise(self.action_dim)
-
     def train(self):
         self.time_step+=1
 
+        # Sample a random minibatch of N transitions from replay buffer
         minibatch = self.replay_buffer.get_batch(BATCH_SIZE) #原来代码
+        # tree_idx, minibatch, ISWeights = self.replay_buffer.sample(BATCH_SIZE)
 
         state_batch = np.asarray([data[0] for data in minibatch])
         action_batch = np.asarray([data[1] for data in minibatch])
@@ -55,6 +55,7 @@ class DDPG:
         action_batch = np.resize(action_batch,[BATCH_SIZE,self.action_dim])
 
         # Calculate y_batch
+        
         next_action_batch = self.actor_network.target_actions(next_state_batch)
         q_value_batch = self.critic_network.target_q(next_state_batch,next_action_batch)
         y_batch = []
@@ -63,9 +64,12 @@ class DDPG:
                 y_batch.append(reward_batch[i])
             else :
                 y_batch.append(reward_batch[i] + GAMMA * q_value_batch[i])
+        #y_batch是目标值
         y_batch = np.resize(y_batch,[BATCH_SIZE,1])
         # Update critic by minimizing the loss L
         self.critic_network.train(y_batch, state_batch, action_batch)
+        # abs_errors,self.cost=self.critic_network.train(ISWeights,y_batch,state_batch,action_batch)
+        # self.replay_buffer.batch_update(tree_idx, abs_errors)  # update priority
 
         # Update the actor policy using the sampled gradient:
         action_batch_for_gradients = self.actor_network.actions(state_batch)
@@ -76,20 +80,16 @@ class DDPG:
         # Update the target networks
         self.actor_network.update_target()
         self.critic_network.update_target()
-
     def noise_action(self,state):
         # Select action a_t according to the current policy and exploration noise
         action = self.actor_network.action(state)
         return action+self.exploration_tatio*self.exploration_noise.noise()
-
     def action(self,state):
         action = self.actor_network.action(state)
         return action
-
     def critic(self,state,action):
         critic=self.critic_network.single_q_value(state,action)
         return critic
-
     def perceive(self,state,action,reward,next_state,done):
         # Store transition (s_t,a_t,r_t,s_{t+1}) in replay buffer
         self.replay_buffer.add(state,action,reward,next_state,done)
@@ -97,6 +97,10 @@ class DDPG:
         # Store transitions to replay start size then start training
         if self.replay_buffer.count() >  REPLAY_START_SIZE:
             self.train()
+
+        ##加载示教数据
+        # self.replay_buffer.add(state, action, reward, next_state, done)
+        # self.train()
 
         if (self.time_step+10000) % 100000 == 0:
             if self.save_network:

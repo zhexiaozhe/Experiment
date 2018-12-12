@@ -16,7 +16,7 @@ class HAND_SHANK(object):
             j = pygame.joystick.Joystick(0)
             j.init()
             self.action = 0
-            print('手柄连接成功')
+            print('手柄连接成功,检查初始状态是否为竖直位置')
             print('先按下按钮，然后按下手柄A键')
         except pygame.error :
             print('手柄连接失败')
@@ -28,7 +28,7 @@ class HAND_SHANK(object):
                 exit()
             elif event.type == pygame.JOYAXISMOTION:
                 if event.axis == 0:
-                    self.action = -10 / 2.73 * event.value
+                    self.action = 10 / 2.73 * event.value
         return self.action
 
     def command(self):

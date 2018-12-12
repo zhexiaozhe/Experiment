@@ -50,5 +50,5 @@ if __name__ =='__main__':
                 print(step)
                 break
             state = next_state
-    pickle.dump(buffer, open('object.pickle', 'wb'))
+    pickle.dump(buffer, open('毕业实验9.pickle', 'wb'))
     # np.save('buffer.npy',buffer)

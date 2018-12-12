@@ -36,10 +36,10 @@ class HAND_SHANK(object):
             if event.type == pygame.QUIT:
                 exit()
             elif event.type==pygame.JOYBUTTONDOWN:
-                if event.button==1:
+                if event.button==1:#A键
                     self.com = 1
                     break
-                elif event.button==2:
+                elif event.button==2:#B键
                     self.com=2
                     break
         return self.com

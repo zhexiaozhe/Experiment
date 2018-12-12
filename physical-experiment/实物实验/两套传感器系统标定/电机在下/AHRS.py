@@ -12,7 +12,7 @@ import time
 
 class AHRS_NEW(object):
     def __init__(self):
-        self.ser=serial.Serial('com4',115200)
+        self.ser=serial.Serial('com11',115200)
     def read(self):
         b = []
         b1=[]
@@ -49,7 +49,7 @@ class AHRS_NEW(object):
         dr=dr*pi/180
 
         # print("角度：%s 角速度：%s" % (roll, -dr))
-        return (roll,dr)
+        return (-roll,dr)
 
 if __name__=='__main__':
     ahrs_new = AHRS_NEW()

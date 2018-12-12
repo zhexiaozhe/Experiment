@@ -12,14 +12,16 @@ from actor_network_bn import ActorNetwork
 from replay_buffer import ReplayBuffer,PrioritizedReplayBuffer
 
 # Hyper Parameters:
-REPLAY_BUFFER_SIZE = 100000
+DEMO_REPLAY_BUFFER_SIZE = 20000
+INTERA_REPLAY_BUFFER_SIZE=100000
 REPLAY_START_SIZE = 100000
 BATCH_SIZE = 64
-TRAIN_BATCH_SIZE=32
+DEMO_BATCH_SIZE = 32
 GAMMA = 0.99
 
 class DDPG:
     """docstring for DDPG"""
+    DEMO_BATCH_SIZE = 32
     def __init__(self, env):
         self.name = 'DDPG' # name for uploading results
         self.environment = env
@@ -29,8 +31,8 @@ class DDPG:
         self.action_dim = env.action_space.shape[0]
         self.time_step=1
         self.save_network=True
-        self.actor_load=False
-        self.critic_load=False
+        self.actor_load=True
+        self.critic_load=True
         self.priority=True
         self.demo=True
         self.exploration_tatio=1
@@ -40,9 +42,9 @@ class DDPG:
 
         # initialize replay buffer
         if self.priority:
-            self.replay_buffer = PrioritizedReplayBuffer(REPLAY_BUFFER_SIZE,self.demo)
+            self.replay_buffer = PrioritizedReplayBuffer(DEMO_REPLAY_BUFFER_SIZE,INTERA_REPLAY_BUFFER_SIZE,self.demo)
         else:
-            self.replay_buffer = ReplayBuffer(REPLAY_BUFFER_SIZE,self.demo)
+            self.replay_buffer = ReplayBuffer(INTERA_REPLAY_BUFFER_SIZE,self.demo)
 
         # Initialize a random process the Ornstein-Uhlenbeck process for action exploration
         self.exploration_noise = OUNoise(self.action_dim)
@@ -51,61 +53,50 @@ class DDPG:
         self.time_step+=1
 
         # Sample a random minibatch of N transitions from replay buffer
+        if self.time_step%100000==0:
+            self.DEMO_BATCH_SIZE=np.max([1,self.DEMO_BATCH_SIZE-5])
+            print(self.DEMO_BATCH_SIZE)
+        demo_tree_idx, demo_minibatch, demo_ISWeights ,demo_pri= self.replay_buffer.demo_sample(self.DEMO_BATCH_SIZE)
+        intera_tree_idx, intera_minibatch, intera_ISWeights, intera_pri = self.replay_buffer.intera_sample((BATCH_SIZE-self.DEMO_BATCH_SIZE))
 
-        demo_tree_idx, demo_minibatch, demo_ISWeights ,demo_pri= self.replay_buffer.demo_sample(TRAIN_BATCH_SIZE)
-        intera_tree_idx, intera_minibatch, intera_ISWeights, intera_pri = self.replay_buffer.intera_sample(TRAIN_BATCH_SIZE)
-        ISWeights=np.ones((TRAIN_BATCH_SIZE,1))
+        # ISWeights=np.vstack((demo_ISWeights,intera_ISWeights))
+        ISWeights=np.ones((BATCH_SIZE,1))
+        minibatch=np.hstack((demo_minibatch,intera_minibatch))
 
-
-        demo_state_batch = np.asarray([data[0] for data in demo_minibatch])
-        demo_action_batch = np.asarray([data[1] for data in demo_minibatch])
-        demo_reward_batch = np.asarray([data[2] for data in demo_minibatch])
-        demo_next_state_batch = np.asarray([data[3] for data in demo_minibatch])
-        demo_done_batch = np.asarray([data[4] for data in demo_minibatch])
-
-        intera_state_batch = np.asarray([data[0] for data in intera_minibatch])
-        intera_action_batch = np.asarray([data[1] for data in intera_minibatch])
-        intera_reward_batch = np.asarray([data[2] for data in intera_minibatch])
-        intera_next_state_batch = np.asarray([data[3] for data in intera_minibatch])
-        intera_done_batch = np.asarray([data[4] for data in intera_minibatch])
+        state_batch = np.asarray([data[0] for data in minibatch])
+        action_batch = np.asarray([data[1] for data in minibatch])
+        reward_batch = np.asarray([data[2] for data in minibatch])
+        next_state_batch = np.asarray([data[3] for data in minibatch])
+        done_batch = np.asarray([data[4] for data in minibatch])
 
         # for action_dim = 1
-        intera_action_batch = np.resize(intera_action_batch,[TRAIN_BATCH_SIZE,self.action_dim])
-        demo_action_batch = np.resize(demo_action_batch, [TRAIN_BATCH_SIZE, self.action_dim])
+        action_batch = np.resize(action_batch, [BATCH_SIZE, self.action_dim])
 
-        # Calculate demo_y_batch
-        demo_next_action_batch = self.actor_network.target_actions(demo_next_state_batch)
-        demo_q_value_batch = self.critic_network.target_q(demo_next_state_batch,demo_next_action_batch)
-        demo_y_batch = []
-        for i in range(len(demo_minibatch)):
-            if demo_done_batch[i]:
-                demo_y_batch.append(demo_reward_batch[i])
-            else :
-                demo_y_batch.append(demo_reward_batch[i] + GAMMA * demo_q_value_batch[i])
-        demo_y_batch = np.resize(demo_y_batch,[TRAIN_BATCH_SIZE,1])
-
-        # Calculate intera_y_batch
-        intera_next_action_batch = self.actor_network.target_actions(intera_next_state_batch)
-        intera_q_value_batch = self.critic_network.target_q(intera_next_state_batch, intera_next_action_batch)
-        intera_y_batch = []
-        for i in range(len(intera_minibatch)):
-            if intera_done_batch[i]:
-                intera_y_batch.append(intera_reward_batch[i])
+        # Calculate y_batch
+        next_action_batch = self.actor_network.target_actions(next_state_batch)
+        q_value_batch = self.critic_network.target_q(next_state_batch, next_action_batch)
+        y_batch = []
+        for i in range(len(minibatch)):
+            if done_batch[i]:
+                y_batch.append(reward_batch[i])
             else:
-                intera_y_batch.append(intera_reward_batch[i] + GAMMA * intera_q_value_batch[i])
-        intera_y_batch = np.resize(intera_y_batch, [TRAIN_BATCH_SIZE, 1])
+                y_batch.append(reward_batch[i] + GAMMA * q_value_batch[i])
+        y_batch = np.resize(y_batch, [BATCH_SIZE, 1])
+        # if 100 in reward_batch:
+        #     print(self.time_step,'\n',reward_batch,'\n',ISWeights)
 
         # Update critic by minimizing the loss L
-        demo_abs_errors,self.demo_cost=self.critic_network.train(demo_y_batch,demo_state_batch,demo_action_batch,ISWeights)
-        intera_abs_errors, self.intera_cost = self.critic_network.train(intera_y_batch, intera_state_batch, intera_action_batch, ISWeights)
+        abs_errors, self.cost = self.critic_network.train(y_batch, state_batch, action_batch, ISWeights)
+        demo_abs_errors = abs_errors[0:self.DEMO_BATCH_SIZE]
+        intera_abs_errors = abs_errors[self.DEMO_BATCH_SIZE::]
         self.replay_buffer.demo_batch_update(demo_tree_idx, demo_abs_errors) # update priority
         self.replay_buffer.intera_batch_update(intera_tree_idx, intera_abs_errors)
 
         # Update the actor policy using the sampled gradient:
-        action_batch_for_gradients = self.actor_network.actions(intera_state_batch)
-        q_gradient_batch = self.critic_network.gradients(intera_state_batch,action_batch_for_gradients)
+        action_batch_for_gradients = self.actor_network.actions(state_batch)
+        q_gradient_batch = self.critic_network.gradients(state_batch,action_batch_for_gradients)
 
-        self.actor_network.train(q_gradient_batch,intera_state_batch)
+        self.actor_network.train(q_gradient_batch,state_batch)
 
         # Update the target networks
         self.actor_network.update_target()
@@ -134,12 +125,11 @@ class DDPG:
         abs_errors = self.critic_network.per_train(y_batch, state_batch, action_batch)
         self.replay_buffer.demo_batch_update(tree_idx, abs_errors)
 
-
     def per_add(self):
-        with open('data\object.pickle', 'rb') as f:
+        with open('data\毕业实验12.pickle', 'rb') as f:
             self.buffer = pickle.load(f)
             print("数据加载完成")
-        for i in range(REPLAY_BUFFER_SIZE):
+        for i in range(DEMO_REPLAY_BUFFER_SIZE):
             state=self.buffer[i][0]
             action=self.buffer[i][1]
             reward=self.buffer[i][2]

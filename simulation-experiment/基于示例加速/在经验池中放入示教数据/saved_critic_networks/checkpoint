@@ -1,2 +1,2 @@
-model_checkpoint_path: "critic-network-86-190000"
-all_model_checkpoint_paths: "critic-network-86-190000"
+model_checkpoint_path: "critic-network-86-690000"
+all_model_checkpoint_paths: "critic-network-86-690000"
